@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { Gender } from './gender.entity';
+import * as bcrypt from 'bcrypt';
 
 @Entity()
 export class User {
@@ -17,7 +18,7 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ unique: true })
   cin: string;
 
   @Column({
@@ -31,6 +32,13 @@ export class User {
   @Column({ nullable: true })
   phoneNumber: string;
 
-  @Column()
+  @Column({ nullable: false })
   password: string;
+
+  @BeforeInsert()
+  async hashPassword() {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+    console.log(this.password);
+  }
 }
