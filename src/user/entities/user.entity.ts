@@ -1,9 +1,16 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  TableInheritance,
+} from 'typeorm';
 import { Gender } from './gender.entity';
 import * as bcrypt from 'bcrypt';
 
 @Entity()
-export class User {
+@TableInheritance({ column: { type: 'varchar', name: 'type' } })
+export abstract class User {
   @PrimaryGeneratedColumn()
   id: number;
 
