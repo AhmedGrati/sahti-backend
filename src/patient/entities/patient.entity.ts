@@ -1,10 +1,16 @@
-import { ChildEntity, Column } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { CivilStatusEnum } from './civil-status.enum';
+import { UserDetail } from '../../user-details/entities/user-detail.entity';
 
-@ChildEntity()
-export class Patient extends User {
-  @Column({ nullable: true })
+@Entity()
+export class Patient {
+  @OneToOne(() => UserDetail, (userDetail) => userDetail.patient, {
+    primary: true,
+    cascade: true,
+  })
+  @JoinColumn()
+  userDetail: UserDetail;
+  @Column({ nullable: false })
   cnamId: number;
 
   @Column({
@@ -12,7 +18,7 @@ export class Patient extends User {
     enum: CivilStatusEnum,
     default: CivilStatusEnum.SINGLE,
   })
-  civilStatus: CivilStatusEnum; //todo change enum married divorced  ...
+  civilStatus: CivilStatusEnum;
 
   @Column()
   socialStatus: string; //student working etc

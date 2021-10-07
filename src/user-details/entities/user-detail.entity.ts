@@ -2,15 +2,18 @@ import {
   BeforeInsert,
   Column,
   Entity,
+  OneToOne,
   PrimaryGeneratedColumn,
-  TableInheritance,
 } from 'typeorm';
-import { Gender } from './gender.entity';
 import * as bcrypt from 'bcrypt';
+import { Gender } from './gender.entity';
+import { Technician } from '../../technician/entities/technician.entity';
+import { Pharmacist } from '../../pharmacist/entities/pharmacist.entity';
+import { Patient } from '../../patient/entities/patient.entity';
+import { Doctor } from '../../doctor/entities/doctor.entity';
 
 @Entity()
-@TableInheritance({ column: { type: 'varchar', name: 'type' } })
-export abstract class User {
+export class UserDetail {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -41,6 +44,18 @@ export abstract class User {
 
   @Column({ nullable: false })
   password: string;
+
+  @OneToOne(() => Technician, (technician) => technician.userDetail)
+  technician: Technician;
+
+  @OneToOne(() => Pharmacist, (pharmacist) => pharmacist.userDetail)
+  pharmacist: Pharmacist;
+
+  @OneToOne(() => Patient, (patient) => patient.userDetail)
+  patient: Patient;
+
+  @OneToOne(() => Doctor, (doctor) => doctor.userDetail)
+  doctor: Doctor;
 
   @BeforeInsert()
   async hashPassword() {
