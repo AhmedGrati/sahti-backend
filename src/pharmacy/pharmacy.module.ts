@@ -8,5 +8,6 @@ import { PharmacyController } from './pharmacy.controller';
   imports: [TypeOrmModule.forFeature([Pharmacy])],
   providers: [PharmacyService],
   controllers: [PharmacyController],
+  exports: [PharmacyService],
 })
 export class PharmacyModule {}

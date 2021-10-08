@@ -5,4 +5,5 @@ export interface EnvironmentVariables {
   POSTGRES_USER: string;
   POSTGRES_PASSWORD: string;
   POSTGRES_DB: string;
+  SEED_NUMBER: string;
 }
