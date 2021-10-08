@@ -8,6 +8,7 @@ import { DoctorModule } from './doctor/doctor.module';
 import { TechnicianModule } from './technician/technician.module';
 import { PharmacistModule } from './pharmacist/pharmacist.module';
 import { UserDetailsModule } from './user-details/user-details.module';
+import { PharmacyModule } from './pharmacy/pharmacy.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UserDetailsModule } from './user-details/user-details.module';
     TechnicianModule,
     PharmacistModule,
     UserDetailsModule,
+    PharmacyModule,
   ],
   controllers: [AppController],
   providers: [AppService],
