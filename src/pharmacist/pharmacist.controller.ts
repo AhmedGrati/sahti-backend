@@ -11,7 +11,7 @@ import { PharmacistService } from './pharmacist.service';
 import { CreatePharmacistDto } from './dto/create-pharmacist.dto';
 import { UpdatePharmacistDto } from './dto/update-pharmacist.dto';
 
-@Controller('pharmacist')
+@Controller('pharmacists')
 export class PharmacistController {
   constructor(private readonly pharmacistService: PharmacistService) {}
 
@@ -39,7 +39,12 @@ export class PharmacistController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.pharmacistService.remove(+id);
+  softDelete(@Param('id') id: string) {
+    return this.pharmacistService.softDelete(+id);
+  }
+
+  @Get('restore/:id')
+  restore(@Param('id') id: string) {
+    return this.pharmacistService.restore(+id);
   }
 }

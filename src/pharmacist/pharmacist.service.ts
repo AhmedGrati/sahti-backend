@@ -1,26 +1,66 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Pharmacy } from 'src/pharmacy/entities/pharmacy.entity';
+import { PharmacyService } from 'src/pharmacy/pharmacy.service';
+import { UserDetail } from 'src/user-details/entities/user-detail.entity';
+import { UserDetailsService } from 'src/user-details/user-details.service';
+import { PHARMACIST_NOT_FOUND_ERROR_MESSAGE } from 'src/utils/constants';
+import { Repository } from 'typeorm';
 import { CreatePharmacistDto } from './dto/create-pharmacist.dto';
 import { UpdatePharmacistDto } from './dto/update-pharmacist.dto';
+import { Pharmacist } from './entities/pharmacist.entity';
 
 @Injectable()
 export class PharmacistService {
-  create(createPharmacistDto: CreatePharmacistDto) {
-    return 'This action adds a new pharmacist';
+  constructor(
+    private readonly pharmacyService: PharmacyService,
+    private readonly userDetailsService: UserDetailsService,
+    @InjectRepository(Pharmacist)
+    private readonly pharmacistRepository: Repository<Pharmacist>,
+  ) {}
+  async create(createPharmacistDto: CreatePharmacistDto) {
+    const { pharmacyId, userDetailsId } = createPharmacistDto;
+    const pharmacy: Pharmacy = await this.pharmacyService.findOne(pharmacyId);
+    const userDetails: UserDetail = await this.userDetailsService.findOne(
+      userDetailsId,
+    );
+
+    const pharmacist = await this.pharmacistRepository.create({});
+    pharmacist.pharmacy = pharmacy;
+    pharmacist.userDetail = userDetails;
+
+    return await this.pharmacistRepository.save(pharmacist);
   }
 
-  findAll() {
-    return `This action returns all pharmacist`;
+  async findAll(): Promise<Pharmacist[]> {
+    return this.pharmacistRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pharmacist`;
+  findOne(id: number): Promise<Pharmacist> {
+    return this.pharmacistRepository.findOne({ where: { id } });
   }
 
-  update(id: number, updatePharmacistDto: UpdatePharmacistDto) {
-    return `This action updates a #${id} pharmacist`;
+  async update(id: number, updatePharmacistDto: UpdatePharmacistDto) {
+    const pharmacist: Pharmacist = await this.findOne(id);
+    if (pharmacist) {
+      const { pharmacyId, userDetailsId } = updatePharmacistDto;
+      const pharmacy: Pharmacy = await this.pharmacyService.findOne(pharmacyId);
+      const userDetails: UserDetail = await this.userDetailsService.findOne(
+        userDetailsId,
+      );
+
+      pharmacist.pharmacy = pharmacy;
+      pharmacist.userDetail = userDetails;
+      return await this.pharmacistRepository.save(pharmacist);
+    }
+    throw new NotFoundException(PHARMACIST_NOT_FOUND_ERROR_MESSAGE);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} pharmacist`;
+  async softDelete(id: number) {
+    return await this.pharmacistRepository.softDelete(id);
+  }
+
+  async restore(id: number) {
+    return await this.pharmacistRepository.restore(id);
   }
 }

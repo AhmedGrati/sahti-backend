@@ -1,5 +1,6 @@
 import { TimestampEntites } from 'src/generics/timestamp.entity';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Pharmacist } from 'src/pharmacist/entities/pharmacist.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Pharmacy extends TimestampEntites {
@@ -14,4 +15,7 @@ export class Pharmacy extends TimestampEntites {
 
   @Column({ nullable: false })
   phone: string;
+
+  @OneToMany(() => Pharmacist, (pharmacist) => pharmacist.pharmacy)
+  pharmacists: Pharmacist[];
 }
