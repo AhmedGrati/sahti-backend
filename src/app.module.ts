@@ -11,6 +11,8 @@ import { UserDetailsModule } from './user-details/user-details.module';
 import { PharmacyModule } from './pharmacy/pharmacy.module';
 import { FakerModule } from './faker/faker.module';
 import { ConfigModule } from '@nestjs/config';
+import { MedicamentModule } from './medicament/medicament.module';
+import { TranscriptionModule } from './transcription/transcription.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { ConfigModule } from '@nestjs/config';
     UserDetailsModule,
     PharmacyModule,
     FakerModule,
+    MedicamentModule,
+    TranscriptionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
