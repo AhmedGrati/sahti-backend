@@ -7,6 +7,7 @@ import {
   ManyToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { TranscriptionStatus } from './transcription-status';
 
 @Entity()
 export class Transcription extends TimestampEntites {
@@ -15,6 +16,13 @@ export class Transcription extends TimestampEntites {
 
   @Column()
   additionalInformation: string;
+
+  @Column({
+    type: 'enum',
+    enum: TranscriptionStatus,
+    default: TranscriptionStatus.NOT_CHECKED,
+  })
+  status: TranscriptionStatus;
 
   @ManyToMany(() => Medicament, (medicament) => medicament.transcriptions)
   @JoinTable()
