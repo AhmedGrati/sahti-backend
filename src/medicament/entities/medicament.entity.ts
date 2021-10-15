@@ -1,5 +1,6 @@
 import { TimestampEntites } from 'src/generics/timestamp.entity';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Transcription } from 'src/transcription/entities/transcription.entity';
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Medicament extends TimestampEntites {
@@ -8,4 +9,7 @@ export class Medicament extends TimestampEntites {
 
   @Column()
   name: string;
+
+  @ManyToMany(() => Transcription, (transcription) => transcription.medicaments)
+  transcriptions: Transcription[];
 }
