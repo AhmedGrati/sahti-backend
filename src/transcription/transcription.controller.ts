@@ -1,9 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { TranscriptionService } from './transcription.service';
 import { CreateTranscriptionDto } from './dto/create-transcription.dto';
 import { UpdateTranscriptionDto } from './dto/update-transcription.dto';
 
-@Controller('transcription')
+@Controller('transcriptions')
 export class TranscriptionController {
   constructor(private readonly transcriptionService: TranscriptionService) {}
 
@@ -23,12 +31,20 @@ export class TranscriptionController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTranscriptionDto: UpdateTranscriptionDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateTranscriptionDto: UpdateTranscriptionDto,
+  ) {
     return this.transcriptionService.update(+id, updateTranscriptionDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.transcriptionService.remove(+id);
+  softDelete(@Param('id') id: string) {
+    return this.transcriptionService.softDelete(+id);
+  }
+
+  @Get('restore/:id')
+  restore(@Param('id') id: string) {
+    return this.transcriptionService.restore(+id);
   }
 }
