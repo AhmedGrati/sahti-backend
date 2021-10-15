@@ -51,4 +51,14 @@ export class MedicamentService {
   async restore(id: number): Promise<UpdateResult> {
     return await this.medicamentRepository.restore(id);
   }
+
+  async findByIdList(idList: number[]): Promise<Medicament[]> {
+    const medicaments = [];
+    for (let i = 0; i < idList.length; i++) {
+      const id = idList[i];
+      const medicament = await this.findOne(id);
+      medicaments.push(medicament);
+    }
+    return medicaments;
+  }
 }
