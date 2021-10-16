@@ -17,7 +17,6 @@ export class MailService {
   async sendUserConfirmation(patient: Patient) {
     const token = this.encodeConfirmationToken(patient);
     const url = this.configService.get('APP_URL') + '/auth/confirm/' + token;
-    console.log(token);
     await this.mailerService.sendMail({
       to: patient.userDetail.email,
       from: '"Support Team" <artzy.proj@gmail.com/>',

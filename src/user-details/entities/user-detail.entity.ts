@@ -8,7 +8,9 @@ import {
 import * as bcrypt from 'bcrypt';
 import { Patient } from '../../patient/entities/patient.entity';
 import { RoleEnum } from './role.enum';
-
+import { ClassSerializerInterceptor, UseInterceptors } from '@nestjs/common';
+import { classToPlain, Exclude } from 'class-transformer';
+@UseInterceptors(ClassSerializerInterceptor)
 @Entity()
 export class UserDetail {
   @PrimaryGeneratedColumn()
@@ -18,6 +20,7 @@ export class UserDetail {
   email: string;
 
   @Column({ nullable: false })
+  @Exclude({ toPlainOnly: true })
   password: string;
 
   @Column({ default: false })
@@ -38,5 +41,8 @@ export class UserDetail {
   async hashPassword() {
     const salt = await bcrypt.genSalt();
     this.password = await bcrypt.hash(this.password, salt);
+  }
+  toJSON() {
+    return classToPlain(this);
   }
 }
