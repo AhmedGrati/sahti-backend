@@ -1,12 +1,46 @@
 import { CivilStatusEnum } from '../entities/civil-status.enum';
-import { CreateUserDetailDto } from '../../user-details/dto/create-user-detail.dto';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsNumberString,
+  IsOptional,
+  Length,
+} from 'class-validator';
+import { Gender } from '../entities/gender.entity';
 
 export class CreatePatientDto {
-  userDetail: CreateUserDetailDto;
+  userDetailId: number;
 
+  @IsNotEmpty()
+  firstName: string;
+
+  @IsNotEmpty()
+  lastName: string;
+
+  @IsNotEmpty()
+  @IsDateString()
+  birthday: Date;
+
+  @IsNumberString()
+  @IsNotEmpty()
+  @Length(8, 8)
+  cin: string;
+
+  @IsNotEmpty()
+  gender: Gender;
+
+  @IsOptional()
+  @IsNumberString()
+  @Length(8, 8)
+  phoneNumber: string;
+
+  @IsNotEmpty()
+  @IsNumberString()
   cnamId: number;
 
-  civilStatus: CivilStatusEnum; //todo change enum married divorced  ...
+  @IsNotEmpty()
+  civilStatus: CivilStatusEnum;
 
+  @IsNotEmpty()
   socialStatus: string;
 }

@@ -1,16 +1,10 @@
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
-
+import { ChildEntity, Column, Entity } from 'typeorm';
 import { OfficeFieldEnum } from './office-field.enum';
-import { UserDetail } from '../../user-details/entities/user-detail.entity';
+import { Patient } from '../../patient/entities/patient.entity';
 
 @Entity()
-export class Technician {
-  @OneToOne(() => UserDetail, (userDetail) => userDetail.technician, {
-    primary: true,
-    cascade: true,
-  })
-  @JoinColumn()
-  userDetail: UserDetail;
+@ChildEntity()
+export class Technician extends Patient {
   @Column()
   officeLocalisation: string;
 

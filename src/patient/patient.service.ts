@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,10 +15,16 @@ export class PatientService {
     private readonly userDetailsService: UserDetailsService,
   ) {}
   async create(createPatientDto: CreatePatientDto): Promise<Patient> {
-    const userDetail = await this.userDetailsService.create(
-      createPatientDto.userDetail,
+    const userDetail = await this.userDetailsService.findOne(
+      createPatientDto.userDetailId,
     );
-    const patient = this.patientRepository.create(createPatientDto);
+    if (!userDetail) {
+      throw new HttpException(
+        'The User Details Provided Dosent Exists',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const patient = await this.patientRepository.create(createPatientDto);
     patient.userDetail = userDetail;
     return this.patientRepository.save(patient);
   }

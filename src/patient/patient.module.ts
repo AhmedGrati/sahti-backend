@@ -15,5 +15,6 @@ import { UserDetail } from '../user-details/entities/user-detail.entity';
   ],
   controllers: [PatientController],
   providers: [PatientService, UserDetailsService],
+  exports: [PatientService],
 })
 export class PatientModule {}
