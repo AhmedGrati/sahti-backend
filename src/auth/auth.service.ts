@@ -3,6 +3,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { SignUpDto } from './dto/sign-up-dto';
 import { TechnicianService } from '../technician/technician.service';
@@ -16,6 +17,9 @@ import { MailService } from '../mail/mail.service';
 import { RoleEnum } from '../patient/entities/role.enum';
 import ConfirmEmailDto from './dto/confirmEmail.dto';
 import VerificationTokenPayload from './entities/verificationTokenPayload.interface';
+import * as bcrypt from 'bcrypt';
+import { LoginDto } from './dto/login.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +32,33 @@ export class AuthService {
     private readonly doctorService: DoctorService,
     private readonly pharmacistService: PharmacistService,
   ) {}
-
+  async validateUser(email: string, pass: string): Promise<Patient> {
+    const patient = await this.patientService.findByEmail(email);
+    if (patient) {
+      const hash = await bcrypt.hash(pass, await bcrypt.genSalt());
+      const isPassEqual = bcrypt.compare(pass, hash);
+      if (isPassEqual) {
+        // eslint-disable-next-line no-unused-vars
+        // const { password, ...result } = patient;
+        // return result;
+        return patient;
+      }
+    }
+    return null;
+  }
+  async login(loginDto: LoginDto): Promise<LoginResponseDto> {
+    const { email, password } = loginDto;
+    const patient = await this.validateUser(email, password);
+    if (patient) {
+      const token = this.encodeLoginToken(patient);
+      const loginResponseDto: LoginResponseDto = {
+        token: token,
+        role: patient.role,
+      };
+      return loginResponseDto;
+    }
+    throw new UnauthorizedException();
+  }
   async signUp(signUpDto: SignUpDto): Promise<Patient> {
     const existPatient = await this.patientService.userExistsByEmail(
       signUpDto.patient.email,
@@ -105,6 +135,15 @@ export class AuthService {
       secret: this.configService.get('JWT_VERIFICATION_TOKEN_SECRET'),
       expiresIn: `${this.configService.get(
         'JWT_VERIFICATION_TOKEN_EXPIRATION_TIME',
+      )}s`,
+    });
+  }
+  public encodeLoginToken(patient: Patient): string {
+    const payload: TokenPayload = { id: patient.id, email: patient.email };
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_LOGIN_TOKEN_SECRET'),
+      expiresIn: `${this.configService.get(
+        'JWT_LOGIN_TOKEN_EXPIRATION_TIME',
       )}s`,
     });
   }

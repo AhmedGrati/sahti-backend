@@ -76,6 +76,10 @@ export class Patient {
     const salt = await bcrypt.genSalt();
     this.password = await bcrypt.hash(this.password, salt);
   }
+  @BeforeInsert()
+  emailToLowerCase() {
+    this.email = this.email.toLowerCase();
+  }
   toJSON() {
     return classToPlain(this);
   }
