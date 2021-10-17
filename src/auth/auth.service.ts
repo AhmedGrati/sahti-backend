@@ -15,6 +15,7 @@ import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service';
 import { RoleEnum } from '../patient/entities/role.enum';
 import ConfirmEmailDto from './dto/confirmEmail.dto';
+import VerificationTokenPayload from './entities/verificationTokenPayload.interface';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +40,8 @@ export class AuthService {
       );
     }
     const patient = await this.signUpFactory(signUpDto);
-    await this.mailService.sendUserConfirmation(patient);
+    const confirmToken = this.encodeConfirmationToken(patient);
+    await this.mailService.sendUserConfirmation(patient, confirmToken);
     return patient;
   }
 
@@ -94,5 +96,16 @@ export class AuthService {
       }
       throw new BadRequestException('Bad confirmation token');
     }
+  }
+  public encodeConfirmationToken(patient: Patient): string {
+    const payload: VerificationTokenPayload = {
+      email: patient.email,
+    };
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_VERIFICATION_TOKEN_SECRET'),
+      expiresIn: `${this.configService.get(
+        'JWT_VERIFICATION_TOKEN_EXPIRATION_TIME',
+      )}s`,
+    });
   }
 }

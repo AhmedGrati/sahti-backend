@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Patient } from '../patient/entities/patient.entity';
-import VerificationTokenPayload from '../auth/entities/verificationTokenPayload.interface';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UrlGeneratorService } from 'nestjs-url-generator';
@@ -14,8 +13,7 @@ export class MailService {
     private readonly configService: ConfigService,
     private readonly urlGeneratorService: UrlGeneratorService,
   ) {}
-  async sendUserConfirmation(patient: Patient) {
-    const token = this.encodeConfirmationToken(patient);
+  async sendUserConfirmation(patient: Patient, token: string) {
     const url = this.configService.get('APP_URL') + '/auth/confirm/' + token;
     await this.mailerService.sendMail({
       to: patient.email,
@@ -26,17 +24,6 @@ export class MailService {
         name: patient.firstName,
         url: url,
       },
-    });
-  }
-  public encodeConfirmationToken(patient: Patient): string {
-    const payload: VerificationTokenPayload = {
-      email: patient.email,
-    };
-    return this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_VERIFICATION_TOKEN_SECRET'),
-      expiresIn: `${this.configService.get(
-        'JWT_VERIFICATION_TOKEN_EXPIRATION_TIME',
-      )}s`,
     });
   }
 }
