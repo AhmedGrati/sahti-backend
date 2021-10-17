@@ -1,15 +1,29 @@
 import { CivilStatusEnum } from '../entities/civil-status.enum';
 import {
   IsDateString,
+  IsEmail,
   IsNotEmpty,
   IsNumberString,
   IsOptional,
   Length,
 } from 'class-validator';
 import { Gender } from '../entities/gender.entity';
+import { PrimaryGeneratedColumn } from 'typeorm';
+import { RoleEnum } from '../entities/role.enum';
 
 export class CreatePatientDto {
-  userDetailId: number;
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  password: string;
+
+  @IsNotEmpty()
+  role: RoleEnum;
 
   @IsNotEmpty()
   firstName: string;

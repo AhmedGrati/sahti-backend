@@ -1,23 +1,39 @@
 import {
+  BeforeInsert,
   Column,
   Entity,
-  JoinColumn,
-  OneToOne,
+  PrimaryGeneratedColumn,
   TableInheritance,
 } from 'typeorm';
 import { CivilStatusEnum } from './civil-status.enum';
-import { UserDetail } from '../../user-details/entities/user-detail.entity';
 import { Gender } from './gender.entity';
+import { classToPlain, Exclude } from 'class-transformer';
+import * as bcrypt from 'bcrypt';
+import { RoleEnum } from './role.enum';
 
 @Entity()
 @TableInheritance({ column: { type: 'varchar', name: 'type' } })
 export class Patient {
-  @OneToOne(() => UserDetail, (userDetail) => userDetail.patient, {
-    primary: true,
-    cascade: true,
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ unique: true })
+  email: string;
+
+  @Column({ nullable: false })
+  @Exclude({ toPlainOnly: true })
+  password: string;
+
+  @Column({ default: false })
+  isEmailVerified: boolean;
+
+  @Column({
+    nullable: false,
+    type: 'enum',
+    enum: RoleEnum,
+    default: RoleEnum.PATIENT,
   })
-  @JoinColumn()
-  userDetail: UserDetail;
+  role: RoleEnum;
 
   @Column()
   firstName: string;
@@ -54,4 +70,13 @@ export class Patient {
 
   @Column()
   socialStatus: string; //student working etc
+
+  @BeforeInsert()
+  async hashPassword() {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+  }
+  toJSON() {
+    return classToPlain(this);
+  }
 }

@@ -1,23 +1,20 @@
 import { IsNotEmpty, IsOptional } from 'class-validator';
-import { CreateUserDetailDto } from '../../user-details/dto/create-user-detail.dto';
+
 import { CreatePatientDto } from '../../patient/dto/create-patient.dto';
-import { CreateDoctorDto } from '../../doctor/dto/create-doctor.dto';
-import { CreatePharmacistDto } from '../../pharmacist/dto/create-pharmacist.dto';
-import { CreateTechnicianDto } from '../../technician/dto/create-technician.dto';
+import { DoctorSignUpDto } from './doctor-sign-up-dto';
+import { PharmacistSignUpDto } from './pharmacist-sign-up-dto';
+import { TechnicianSignUpDto } from './technician-sign-up.dto';
 
 export class SignUpDto {
   @IsNotEmpty()
-  userDetail: CreateUserDetailDto;
-
-  @IsOptional()
   patient: CreatePatientDto;
 
   @IsOptional()
-  doctor: CreateDoctorDto;
+  doctor: DoctorSignUpDto;
 
   @IsOptional()
-  pharmacist: CreatePharmacistDto;
+  pharmacist: PharmacistSignUpDto;
 
   @IsOptional()
-  technician: CreateTechnicianDto;
+  technician: TechnicianSignUpDto;
 }

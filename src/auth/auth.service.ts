@@ -5,18 +5,16 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { SignUpDto } from './dto/sign-up-dto';
-import { UserDetailsService } from '../user-details/user-details.service';
 import { TechnicianService } from '../technician/technician.service';
 import { Patient } from '../patient/entities/patient.entity';
-import { RoleEnum } from '../user-details/entities/role.enum';
 import { PatientService } from '../patient/patient.service';
 import { DoctorService } from '../doctor/doctor.service';
 import { PharmacistService } from '../pharmacist/pharmacist.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-
-import { UserDetail } from '../user-details/entities/user-detail.entity';
 import { MailService } from '../mail/mail.service';
+import { RoleEnum } from '../patient/entities/role.enum';
+import ConfirmEmailDto from './dto/confirmEmail.dto';
 
 @Injectable()
 export class AuthService {
@@ -24,7 +22,6 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly mailService: MailService,
     private readonly jwtService: JwtService,
-    private readonly userDetailsService: UserDetailsService,
     private readonly technicianService: TechnicianService,
     private readonly patientService: PatientService,
     private readonly doctorService: DoctorService,
@@ -32,62 +29,54 @@ export class AuthService {
   ) {}
 
   async signUp(signUpDto: SignUpDto): Promise<Patient> {
-    const existUser = await this.userDetailsService.userExistsByEmail(
-      signUpDto.userDetail.email,
+    const existPatient = await this.patientService.userExistsByEmail(
+      signUpDto.patient.email,
     );
-    if (existUser) {
+    if (existPatient) {
       throw new HttpException(
         'The User With Given Email Already Exists',
         HttpStatus.BAD_REQUEST,
       );
     }
-    const userDetail = await this.userDetailsService.create(
-      signUpDto.userDetail,
-    );
-    const patient = await this.signUpFactory(signUpDto, userDetail.id);
+    const patient = await this.signUpFactory(signUpDto);
     await this.mailService.sendUserConfirmation(patient);
     return patient;
   }
 
-  async signUpFactory(
-    signUpDto: SignUpDto,
-    userDetailId: number,
-  ): Promise<Patient> {
-    switch (signUpDto.userDetail.role) {
+  async signUpFactory(signUpDto: SignUpDto): Promise<Patient> {
+    switch (signUpDto.patient.role) {
       case RoleEnum.PATIENT:
-        const patientDto = {
-          userDetailId: userDetailId,
-          ...signUpDto.patient,
-        };
-        return this.patientService.create(patientDto);
+        return this.patientService.create(signUpDto.patient);
       case RoleEnum.DOCTOR:
         const doctorDto = {
-          userDetailId: userDetailId,
+          ...signUpDto.patient,
           ...signUpDto.doctor,
         };
         return this.doctorService.create(doctorDto);
       case RoleEnum.PHARMACIST:
         const pharmacistDto = {
-          userDetailId: userDetailId,
+          ...signUpDto.patient,
           ...signUpDto.pharmacist,
         };
         return this.pharmacistService.create(pharmacistDto);
       case RoleEnum.TECHNICIAN:
         const technicianDto = {
-          userDetailId: userDetailId,
+          ...signUpDto.patient,
           ...signUpDto.technician,
         };
         return this.technicianService.create(technicianDto);
     }
   }
 
-  public async confirmEmail(token: string): Promise<UserDetail> {
-    const email = await this.decodeConfirmationToken(token);
-    const user = await this.userDetailsService.findByEmail(email);
-    if (user.isEmailVerified) {
-      throw new BadRequestException('Email already confirmed');
+  public async confirmEmail(
+    confirmEmailDto: ConfirmEmailDto,
+  ): Promise<Patient> {
+    const email = await this.decodeConfirmationToken(confirmEmailDto.token);
+    const patient = await this.patientService.findByEmail(email);
+    if (patient.isEmailVerified) {
+      throw new BadRequestException('User Email already confirmed');
     }
-    return await this.userDetailsService.markEmailAsConfirmed(email);
+    return await this.patientService.markEmailAsConfirmed(email);
   }
   public async decodeConfirmationToken(token: string): Promise<string> {
     try {

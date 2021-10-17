@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UserDetailsModule } from '../user-details/user-details.module';
 import { TechnicianModule } from '../technician/technician.module';
 import { DoctorModule } from '../doctor/doctor.module';
 import { PharmacistModule } from '../pharmacist/pharmacist.module';
@@ -14,7 +13,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   controllers: [AuthController],
   providers: [AuthService],
   imports: [
-    UserDetailsModule,
     TechnicianModule,
     DoctorModule,
     PharmacistModule,

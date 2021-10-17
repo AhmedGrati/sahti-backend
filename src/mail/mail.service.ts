@@ -18,7 +18,7 @@ export class MailService {
     const token = this.encodeConfirmationToken(patient);
     const url = this.configService.get('APP_URL') + '/auth/confirm/' + token;
     await this.mailerService.sendMail({
-      to: patient.userDetail.email,
+      to: patient.email,
       from: '"Support Team" <artzy.proj@gmail.com/>',
       subject: 'Welcome to Sahti! Confirm your Email',
       template: './confirmation',
@@ -30,7 +30,7 @@ export class MailService {
   }
   public encodeConfirmationToken(patient: Patient): string {
     const payload: VerificationTokenPayload = {
-      email: patient.userDetail.email,
+      email: patient.email,
     };
     return this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_VERIFICATION_TOKEN_SECRET'),
