@@ -26,4 +26,18 @@ export class MailService {
       },
     });
   }
+  async sendResetConfirmation(patient: Patient, token: string) {
+    const url =
+      this.configService.get('APP_URL') + '/auth/reset/confirm/' + token;
+    await this.mailerService.sendMail({
+      to: patient.email,
+      from: '"Support Team" <artzy.proj@gmail.com/>',
+      subject: 'Sahti! Reset Password ',
+      template: './confirmation',
+      context: {
+        name: patient.firstName,
+        url: url,
+      },
+    });
+  }
 }

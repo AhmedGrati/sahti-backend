@@ -20,7 +20,9 @@ import VerificationTokenPayload from './entities/verificationTokenPayload.interf
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
-
+import { ResetPasswordRequestDto } from './dto/reset-password-request.dto';
+import { ResetPasswordConfirmDto } from './dto/reset-password-confirm.dto';
+import * as crypto from 'crypto-js';
 @Injectable()
 export class AuthService {
   constructor(
@@ -34,13 +36,10 @@ export class AuthService {
   ) {}
   async validateUser(email: string, pass: string): Promise<Patient> {
     const patient = await this.patientService.findByEmail(email);
+    console.log(pass);
     if (patient) {
-      const hash = await bcrypt.hash(pass, await bcrypt.genSalt());
-      const isPassEqual = bcrypt.compare(pass, hash);
+      const isPassEqual = await bcrypt.compare(pass, patient.password);
       if (isPassEqual) {
-        // eslint-disable-next-line no-unused-vars
-        // const { password, ...result } = patient;
-        // return result;
         return patient;
       }
     }
@@ -110,6 +109,21 @@ export class AuthService {
     }
     return await this.patientService.markEmailAsConfirmed(email);
   }
+  public async confirmResetPassword(
+    resetPasswordConfirmDto: ResetPasswordConfirmDto,
+    token: string,
+  ): Promise<Patient> {
+    const email = await this.decodeResetToken(token);
+    if (email) {
+      const patient = await this.patientService.findByEmail(email);
+      const passwordHash = await bcrypt.hash(
+        resetPasswordConfirmDto.password,
+        await bcrypt.genSalt(),
+      );
+      return this.patientService.update(patient.id, { password: passwordHash });
+    }
+    throw new BadRequestException();
+  }
   public async decodeConfirmationToken(token: string): Promise<string> {
     try {
       const payload = await this.jwtService.verify(token, {
@@ -126,6 +140,36 @@ export class AuthService {
       }
       throw new BadRequestException('Bad confirmation token');
     }
+  }
+  public async decodeResetToken(token: string): Promise<string> {
+    const payload = this.jwtService.decode(token);
+    if (typeof payload === 'object' && 'email' in payload) {
+      const patient = await this.patientService.findByEmail(payload.email);
+      if (patient) {
+        try {
+          const secret = await this.generateResetSecret(patient);
+          const payload = await this.jwtService.verify(token, {
+            secret: secret,
+          });
+          return payload.email;
+        } catch (error) {
+          if (error?.name === 'TokenExpiredError') {
+            throw new BadRequestException('Email confirmation token expired');
+          }
+          throw new BadRequestException('Bad confirmation token');
+        }
+      }
+    }
+    throw new BadRequestException();
+  }
+  async requestResetPassword(
+    resetPasswordDto: ResetPasswordRequestDto,
+  ): Promise<Patient> {
+    const { email } = resetPasswordDto;
+    const patient = await this.patientService.findByEmail(email);
+    const token = await this.encodeResetToken(patient);
+    await this.mailService.sendResetConfirmation(patient, token);
+    return patient;
   }
   public encodeConfirmationToken(patient: Patient): string {
     const payload: VerificationTokenPayload = {
@@ -146,5 +190,28 @@ export class AuthService {
         'JWT_LOGIN_TOKEN_EXPIRATION_TIME',
       )}s`,
     });
+  }
+  public async encodeResetToken(patient: Patient): Promise<string> {
+    const payload: TokenPayload = { id: patient.id, email: patient.email };
+    const secret = await this.generateResetSecret(patient);
+    const token = await this.jwtService.sign(payload, {
+      secret: secret,
+      expiresIn: `${this.configService.get(
+        'JWT_LOGIN_TOKEN_EXPIRATION_TIME',
+      )}s`,
+    });
+    return token;
+  }
+  public async generateResetSecret(patient: Patient): Promise<string> {
+    const secret =
+      patient.id +
+      patient.email +
+      patient.password +
+      this.configService.get('JWT_RESET_TOKEN_SECRET');
+    const secretHash = await crypto.HmacSHA256(
+      secret,
+      this.configService.get('JWT_RESET_TOKEN_SECRET'),
+    );
+    return secretHash.toString();
   }
 }
