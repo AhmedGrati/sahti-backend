@@ -1,17 +1,13 @@
-import { TimestampEntites } from 'src/generics/timestamp.entity';
 import { Pharmacy } from 'src/pharmacy/entities/pharmacy.entity';
-import { Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
-import { UserDetail } from '../../user-details/entities/user-detail.entity';
+import { ChildEntity, Column, Entity, ManyToOne } from 'typeorm';
+import { Patient } from '../../patient/entities/patient.entity';
 
 @Entity()
-export class Pharmacist extends TimestampEntites {
-  @OneToOne(() => UserDetail, (userDetail) => userDetail.pharmacist, {
-    primary: true,
-    cascade: true,
-  })
-  @JoinColumn()
-  userDetail: UserDetail;
-
+@ChildEntity()
+export class Pharmacist extends Patient {
+  @Column()
+  pharmacyLocalisation: string;
+  
   @ManyToOne(() => Pharmacy, (pharmacy) => pharmacy.pharmacists)
   pharmacy: Pharmacy;
 }

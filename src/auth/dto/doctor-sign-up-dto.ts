@@ -1,8 +1,7 @@
-import { CreatePatientDto } from '../../patient/dto/create-patient.dto';
-import { Column } from 'typeorm';
 import { IsNotEmpty, IsNumberString } from 'class-validator';
+import { Column } from 'typeorm';
 
-export class CreateDoctorDto extends CreatePatientDto {
+export class DoctorSignUpDto {
   @IsNotEmpty()
   @IsNumberString()
   doctorNumber: number;

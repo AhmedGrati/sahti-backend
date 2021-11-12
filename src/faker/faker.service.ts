@@ -6,6 +6,6 @@ export class FakerService implements OnApplicationBootstrap {
   constructor(private readonly fakerPharmacyService: FakerPharmacyService) {}
 
   async onApplicationBootstrap() {
-    await this.fakerPharmacyService.seed();
+    // await this.fakerPharmacyService.seed();
   }
 }

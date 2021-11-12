@@ -35,7 +35,7 @@ export class PharmacistController {
     @Param('id') id: string,
     @Body() updatePharmacistDto: UpdatePharmacistDto,
   ) {
-    return this.pharmacistService.update(+id, updatePharmacistDto);
+    // return this.pharmacistService.update(+id, updatePharmacistDto);
   }
 
   @Delete(':id')

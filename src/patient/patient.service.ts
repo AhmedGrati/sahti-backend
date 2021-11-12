@@ -1,51 +1,54 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { Patient } from './entities/patient.entity';
-import { UserDetailsService } from '../user-details/user-details.service';
-import { UserDetail } from 'src/user-details/entities/user-detail.entity';
-import { USER_DETAILS_NOT_FOUND_ERROR_MESSAGE } from 'src/utils/constants';
-/*
- 1- auth methode esemha sign up {}
- 2- get user details => creation => user details ID
- 3- switch case sur le type
-*/
 @Injectable()
 export class PatientService {
   constructor(
     @InjectRepository(Patient)
     private readonly patientRepository: Repository<Patient>,
-    private readonly userDetailsService: UserDetailsService,
   ) {}
   async create(createPatientDto: CreatePatientDto): Promise<Patient> {
-    const { userDetailsId, ...dto } = createPatientDto;
-    const userDetails: UserDetail = await this.userDetailsService.findOne(
-      userDetailsId,
-    );
-    if (userDetails) {
-      const patient = this.patientRepository.create(dto);
-      patient.userDetail = userDetails;
-      return this.patientRepository.save(patient);
-    }
-    throw new NotFoundException(USER_DETAILS_NOT_FOUND_ERROR_MESSAGE);
+    const patient = await this.patientRepository.create(createPatientDto);
+    return this.patientRepository.save(patient);
   }
 
-  findAll() {
-    return `This action returns all patient`;
+  async findAll(): Promise<Patient[]> {
+    return this.patientRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} patient`;
+  async findOne(id: number): Promise<Patient> {
+    return this.patientRepository.findOne(id);
   }
 
-  update(id: number, updatePatientDto: UpdatePatientDto) {
-    return `This action updates a #${id} patient`;
+  async update(
+    id: number,
+    updatePatientDto: UpdatePatientDto,
+  ): Promise<Patient> {
+    const patient = await this.patientRepository.preload({
+      id,
+      ...updatePatientDto,
+    });
+    return this.patientRepository.save(patient);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} patient`;
+  async remove(id: number): Promise<DeleteResult> {
+    return this.patientRepository.delete(id);
+  }
+  async userExistsByEmail(userEmail: string): Promise<boolean> {
+    return (await this.findByEmail(userEmail)) != null;
+  }
+  async findByEmail(userEmail: string): Promise<Patient> {
+    return await this.patientRepository.findOne({
+      where: { email: userEmail },
+    });
+  }
+  async markEmailAsConfirmed(userEmail: string): Promise<Patient> {
+    const patient = await this.findByEmail(userEmail);
+    patient.isEmailVerified = true;
+    return this.patientRepository.save(patient);
   }
 }
