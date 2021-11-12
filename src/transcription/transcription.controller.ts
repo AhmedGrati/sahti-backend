@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { TranscriptionService } from './transcription.service';
 import { CreateTranscriptionDto } from './dto/create-transcription.dto';
@@ -23,6 +24,13 @@ export class TranscriptionController {
   @Get()
   findAll() {
     return this.transcriptionService.findAll();
+  }
+
+  @Get('non-checked')
+  findNonChecked(@Query('patientId') patientId: string) {
+    return this.transcriptionService.findListOfNonValidatedTranscriptions(
+      +patientId,
+    );
   }
 
   @Get(':id')

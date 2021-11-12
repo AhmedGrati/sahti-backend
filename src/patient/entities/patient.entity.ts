@@ -1,6 +1,7 @@
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { CivilStatusEnum } from './civil-status.enum';
 import { UserDetail } from '../../user-details/entities/user-detail.entity';
+import { Transcription } from 'src/transcription/entities/transcription.entity';
 
 @Entity()
 export class Patient {
@@ -22,4 +23,7 @@ export class Patient {
 
   @Column()
   socialStatus: string; //student working etc
+
+  @OneToMany(() => Transcription, (transcription) => transcription.patient)
+  transcriptions: Transcription[];
 }

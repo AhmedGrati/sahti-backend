@@ -38,7 +38,7 @@ class DatabaseConfigService {
       host: config.host,
       port: config.port,
       entities: [`${entitiesPath}/**/*.entity{.ts,.js}`],
-      // logging:true,
+      logging: true,
       synchronize: true,
       keepConnectionAlive: true,
     };

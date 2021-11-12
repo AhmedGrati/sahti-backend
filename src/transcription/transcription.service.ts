@@ -61,4 +61,13 @@ export class TranscriptionService {
   async restore(id: number): Promise<UpdateResult> {
     return await this.transcriptionRepository.restore(id);
   }
+  findListOfNonValidatedTranscriptions(
+    patientId: number,
+  ): Promise<Transcription[]> {
+    return this.transcriptionRepository
+      .createQueryBuilder('transcription')
+      .leftJoinAndSelect('transcription.patient', 'patient')
+      .printSql()
+      .getMany();
+  }
 }
