@@ -3,7 +3,12 @@
   "root": "./",
   "sourceRoot": "src",
   "compilerOptions": {
-    "assets": ["mail/templates/**/*.hbs"],
+    "assets": [
+      {
+        "include": "mail/templates/**/*.hbs",
+        "outdir": "dist/src"
+      }
+    ],
     "outDir": "dist/src",
     "watchAssets": true
   }
