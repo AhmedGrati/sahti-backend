@@ -55,4 +55,9 @@ export class TranscriptionController {
   restore(@Param('id') id: string) {
     return this.transcriptionService.restore(+id);
   }
+
+  @Post('check/:id')
+  checkTranscription(@Param('id') id: string) {
+    return this.transcriptionService.checkTranscription(+id);
+  }
 }

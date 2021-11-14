@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MedicamentService } from 'src/medicament/medicament.service';
+import { PatientService } from 'src/patient/patient.service';
 import { Repository, UpdateResult } from 'typeorm';
 import { CreateTranscriptionDto } from './dto/create-transcription.dto';
 import { UpdateTranscriptionDto } from './dto/update-transcription.dto';
+import { TranscriptionStatus } from './entities/transcription-status';
 import { Transcription } from './entities/transcription.entity';
 
 @Injectable()
@@ -12,9 +14,11 @@ export class TranscriptionService {
     @InjectRepository(Transcription)
     private readonly transcriptionRepository: Repository<Transcription>,
     private readonly medicamentService: MedicamentService,
+    private readonly patientService: PatientService,
   ) {}
   async create(createTranscriptionDto: CreateTranscriptionDto) {
-    const { additionalInformation, medicamentsIdList } = createTranscriptionDto;
+    const { additionalInformation, medicamentsIdList, patientId } =
+      createTranscriptionDto;
     const transcription = await this.transcriptionRepository.create({
       additionalInformation,
     });
@@ -22,7 +26,9 @@ export class TranscriptionService {
     const medicaments = await this.medicamentService.findByIdList(
       medicamentsIdList,
     );
+    const patient = await this.patientService.findOne(patientId);
     transcription.medicaments = medicaments;
+    transcription.patient = patient;
     return this.transcriptionRepository.save(transcription);
   }
 
@@ -41,13 +47,16 @@ export class TranscriptionService {
   }
 
   async update(id: number, updateTranscriptionDto: UpdateTranscriptionDto) {
-    const { medicamentsIdList, additionalInformation } = updateTranscriptionDto;
+    const { medicamentsIdList, additionalInformation, patientId } =
+      updateTranscriptionDto;
     const transaction = await this.findOne(id);
     if (transaction) {
       const medicaments = await this.medicamentService.findByIdList(
         medicamentsIdList,
       );
+      const patient = await this.patientService.findOne(patientId);
       transaction.medicaments = medicaments;
+      transaction.patient = patient;
       transaction.additionalInformation = additionalInformation;
       return this.transcriptionRepository.save(transaction);
     }
@@ -61,13 +70,23 @@ export class TranscriptionService {
   async restore(id: number): Promise<UpdateResult> {
     return await this.transcriptionRepository.restore(id);
   }
-  findListOfNonValidatedTranscriptions(
+  async findListOfNonValidatedTranscriptions(
     patientId: number,
   ): Promise<Transcription[]> {
     return this.transcriptionRepository
       .createQueryBuilder('transcription')
       .leftJoinAndSelect('transcription.patient', 'patient')
+      .where('transcription.patient.id = :patientId', { patientId })
+      .andWhere('transcription.status = :status', {
+        status: TranscriptionStatus.NOT_CHECKED,
+      })
       .printSql()
       .getMany();
+  }
+
+  async checkTranscription(id: number) {
+    const transcription = await this.findOne(id);
+    transcription.status = TranscriptionStatus.CHECKED;
+    return this.transcriptionRepository.save(transcription);
   }
 }
