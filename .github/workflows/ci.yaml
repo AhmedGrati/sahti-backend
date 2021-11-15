@@ -52,7 +52,7 @@ jobs:
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.PASSWORD}}
           subject: Github Actions Build Result
-          from: ahmedgrati1999@gmail.com
+          from: ${{secrets.MAIL_USERNAME}}
           to: ahmed.grati@insat.ucar.tn
           secure: true
           body: Build job of ${{github.repository}} completed successfully!
