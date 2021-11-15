@@ -44,15 +44,15 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           push: ${{ github.event_name != 'pull_request' }}
           
-      - name: Send Post CI Mail
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: ${{secrets.MAIL_USERNAME}}
-          password: ${{secrets.PASSWORD}}
-          subject: Github Actions Build Result
-          from: ${{secrets.MAIL_USERNAME}}
-          to: ahmed.grati@insat.ucar.tn
-          secure: true
-          body: Build job of ${{github.repository}} completed successfully!
+      # - name: Send Post CI Mail
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: smtp.gmail.com
+      #     server_port: 465
+      #     username: ${{secrets.MAIL_USERNAME}}
+      #     password: ${{secrets.PASSWORD}}
+      #     subject: Github Actions Build Result
+      #     from: ${{secrets.MAIL_USERNAME}}
+      #     to: ahmed.grati@insat.ucar.tn
+      #     secure: true
+      #     body: Build job of ${{github.repository}} completed successfully!
