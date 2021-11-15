@@ -1,15 +1,6 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { PharmacistService } from './pharmacist.service';
 import { CreatePharmacistDto } from './dto/create-pharmacist.dto';
-import { UpdatePharmacistDto } from './dto/update-pharmacist.dto';
 
 @Controller('pharmacists')
 export class PharmacistController {
@@ -30,13 +21,13 @@ export class PharmacistController {
     return this.pharmacistService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updatePharmacistDto: UpdatePharmacistDto,
-  ) {
-    // return this.pharmacistService.update(+id, updatePharmacistDto);
-  }
+  // @Patch(':id')
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updatePharmacistDto: UpdatePharmacistDto,
+  // ) {
+  //   // return this.pharmacistService.update(+id, updatePharmacistDto);
+  // }
 
   @Delete(':id')
   softDelete(@Param('id') id: string) {
