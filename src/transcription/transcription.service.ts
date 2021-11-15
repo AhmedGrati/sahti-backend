@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ErrorType } from 'src/generics/error-type.enum';
 import { MedicamentService } from 'src/medicament/medicament.service';
 import { PatientService } from 'src/patient/patient.service';
+import { generateBasicErrorMessage } from 'src/utils/error-message-generator';
 import { Repository, UpdateResult } from 'typeorm';
 import { CreateTranscriptionDto } from './dto/create-transcription.dto';
 import { UpdateTranscriptionDto } from './dto/update-transcription.dto';
@@ -43,7 +45,9 @@ export class TranscriptionService {
     if (transcription) {
       return transcription;
     }
-    throw new NotFoundException('Transcription Not Found');
+    throw new NotFoundException(
+      generateBasicErrorMessage(Transcription.name, ErrorType.NOT_FOUND),
+    );
   }
 
   async update(id: number, updateTranscriptionDto: UpdateTranscriptionDto) {
