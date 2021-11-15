@@ -38,7 +38,7 @@ jobs:
           image: sahtiteam/sahti-backend:1.0.0
           registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }
+          password: ${{ secrets.DOCKER_PASSWORD }}
           
       - name: Send Post CI Mail
         uses: dawidd6/action-send-mail@v3
