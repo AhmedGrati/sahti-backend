@@ -36,7 +36,6 @@ jobs:
         uses: mr-smithers-excellent/docker-build-push@v4
         with:
           image: sahtiteam/sahti-backend
-          tags: 1.0.0
           registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
