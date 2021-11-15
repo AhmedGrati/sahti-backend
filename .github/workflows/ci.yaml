@@ -38,7 +38,6 @@ jobs:
           image: sahtiteam/sahti-backend
           target: development
           file: Dockerfile
-          tags: latest, v1.0.0
           registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
