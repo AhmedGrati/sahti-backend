@@ -35,7 +35,8 @@ jobs:
       - name: Build And Push Docker Image
         uses: mr-smithers-excellent/docker-build-push@v4
         with:
-          image: sahtiteam/sahti-backend:1.0.0
+          image: sahtiteam/sahti-backend
+          tags: 1.0.0
           registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
