@@ -43,7 +43,7 @@ export class TranscriptionService {
     if (transcription) {
       return transcription;
     }
-    throw new NotFoundException();
+    throw new NotFoundException('Transcription Not Found');
   }
 
   async update(id: number, updateTranscriptionDto: UpdateTranscriptionDto) {

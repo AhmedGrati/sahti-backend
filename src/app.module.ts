@@ -15,6 +15,8 @@ import { TranscriptionModule } from './transcription/transcription.module';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { LoggerMiddleware } from './shared/middlewares/logger.middleware';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpErrorFilter } from './shared/filters/http-error.filter';
 
 @Module({
   imports: [
@@ -35,7 +37,13 @@ import { LoggerMiddleware } from './shared/middlewares/logger.middleware';
     MailModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: HttpErrorFilter,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
