@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MEDICMANET_NOT_FOUND_ERROR_MESSAGE } from 'src/utils/constants';
+import { generateNotFoundErrorMessage } from 'src/utils/error-message-generator';
 import { Repository, UpdateResult } from 'typeorm';
 import { CreateMedicamentDto } from './dto/create-medicament.dto';
 import { UpdateMedicamentDto } from './dto/update-medicament.dto';
@@ -30,7 +30,7 @@ export class MedicamentService {
     if (medicament) {
       return medicament;
     }
-    throw new NotFoundException(MEDICMANET_NOT_FOUND_ERROR_MESSAGE);
+    throw new NotFoundException(generateNotFoundErrorMessage(Medicament.name));
   }
 
   async update(id: number, updateMedicamentDto: UpdateMedicamentDto) {
@@ -41,7 +41,7 @@ export class MedicamentService {
     if (medicament) {
       return this.medicamentRepository.save(medicament);
     }
-    throw new NotFoundException(MEDICMANET_NOT_FOUND_ERROR_MESSAGE);
+    throw new NotFoundException(generateNotFoundErrorMessage(Medicament.name));
   }
 
   async softDelete(id: number): Promise<UpdateResult> {

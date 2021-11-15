@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PHARMACY_NOT_FOUND_ERROR_MESSAGE } from '../utils/constants';
 import { Repository, UpdateResult } from 'typeorm';
 import { CreatePharmacyDto } from './dto/create-pharmacy.dto';
 import { UpdatePharmacyDto } from './dto/update-pharmacy.dto';
 import { Pharmacy } from './entities/pharmacy.entity';
+import { generateNotFoundErrorMessage } from 'src/utils/error-message-generator';
 
 @Injectable()
 export class PharmacyService {
@@ -26,7 +26,7 @@ export class PharmacyService {
     if (pharmacy) {
       return pharmacy;
     }
-    throw new NotFoundException(PHARMACY_NOT_FOUND_ERROR_MESSAGE);
+    throw new NotFoundException(generateNotFoundErrorMessage(Pharmacy.name));
   }
 
   async update(
@@ -40,7 +40,7 @@ export class PharmacyService {
     if (pharmacy) {
       return this.pharmacyRepository.save(pharmacy);
     }
-    throw new NotFoundException(PHARMACY_NOT_FOUND_ERROR_MESSAGE);
+    throw new NotFoundException(generateNotFoundErrorMessage(Pharmacy.name));
   }
 
   async softDelete(id: number): Promise<UpdateResult> {

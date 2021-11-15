@@ -63,7 +63,6 @@ export class TranscriptionService {
       transaction.additionalInformation = additionalInformation;
       return this.transcriptionRepository.save(transaction);
     }
-    throw new NotFoundException();
   }
 
   async softDelete(id: number): Promise<UpdateResult> {
