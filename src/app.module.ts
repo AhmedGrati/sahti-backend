@@ -17,6 +17,7 @@ import { MailModule } from './mail/mail.module';
 import { LoggerMiddleware } from './shared/middlewares/logger.middleware';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpErrorFilter } from './shared/filters/http-error.filter';
+import { MedicalCheckUpModule } from './medical-check-up/medical-check-up.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { HttpErrorFilter } from './shared/filters/http-error.filter';
     TranscriptionModule,
     AuthModule,
     MailModule,
+    MedicalCheckUpModule,
   ],
   controllers: [AppController],
   providers: [
