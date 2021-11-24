@@ -1,6 +1,8 @@
 import { RoleEnum } from '../../patient/entities/role.enum';
 
 export class LoginResponseDto {
-  token: string;
+  accessToken: string;
+  refreshToken: string;
   role: RoleEnum;
+  //TODO : change role to user entity
 }

@@ -15,7 +15,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service';
 import { RoleEnum } from '../patient/entities/role.enum';
-import ConfirmEmailDto from './dto/confirmEmail.dto';
+import ConfirmEmailDto from './dto/confirm-email.dto';
 import VerificationTokenPayload from './entities/verificationTokenPayload.interface';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
@@ -23,6 +23,9 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import { ResetPasswordRequestDto } from './dto/reset-password-request.dto';
 import { ResetPasswordConfirmDto } from './dto/reset-password-confirm.dto';
 import * as crypto from 'crypto-js';
+import { RefreshTokenResponseDto } from './dto/refresh-token-response.dto';
+import { RefreshTokenRequestDto } from './dto/refresh-token-request.dto';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -34,6 +37,7 @@ export class AuthService {
     private readonly doctorService: DoctorService,
     private readonly pharmacistService: PharmacistService,
   ) {}
+
   async validateUser(email: string, pass: string): Promise<Patient> {
     const patient = await this.patientService.findByEmail(email);
     console.log(pass);
@@ -45,19 +49,35 @@ export class AuthService {
     }
     return null;
   }
+  async refreshToken(
+    refreshTokenRequestDto: RefreshTokenRequestDto,
+  ): Promise<RefreshTokenResponseDto> {
+    const { refreshToken } = refreshTokenRequestDto;
+    const userEmail = await this.decodeRefreshToken(refreshToken);
+    const patient = await this.patientService.findByEmail(userEmail);
+    const refreshTokenUpdated = this.encodeRefreshToken(patient);
+    const accessToken = this.encodeAccessToken(patient);
+    return {
+      refreshToken: refreshTokenUpdated,
+      accessToken: accessToken,
+    };
+  }
   async login(loginDto: LoginDto): Promise<LoginResponseDto> {
     const { email, password } = loginDto;
     const patient = await this.validateUser(email, password);
     if (patient) {
-      const token = this.encodeLoginToken(patient);
+      const accessToken = this.encodeAccessToken(patient);
+      const refreshToken = this.encodeRefreshToken(patient);
       const loginResponseDto: LoginResponseDto = {
-        token: token,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
         role: patient.role,
       };
       return loginResponseDto;
     }
     throw new UnauthorizedException();
   }
+
   async signUp(signUpDto: SignUpDto): Promise<Patient> {
     const existPatient = await this.patientService.userExistsByEmail(
       signUpDto.patient.email,
@@ -109,6 +129,7 @@ export class AuthService {
     }
     return await this.patientService.markEmailAsConfirmed(email);
   }
+
   public async confirmResetPassword(
     resetPasswordConfirmDto: ResetPasswordConfirmDto,
     token: string,
@@ -124,6 +145,7 @@ export class AuthService {
     }
     throw new BadRequestException();
   }
+
   public async decodeConfirmationToken(token: string): Promise<string> {
     try {
       const payload = await this.jwtService.verify(token, {
@@ -141,6 +163,7 @@ export class AuthService {
       throw new BadRequestException('Bad confirmation token');
     }
   }
+
   public async decodeResetToken(token: string): Promise<string> {
     const payload = this.jwtService.decode(token);
     if (typeof payload === 'object' && 'email' in payload) {
@@ -162,6 +185,24 @@ export class AuthService {
     }
     throw new BadRequestException();
   }
+  public async decodeRefreshToken(token: string): Promise<string> {
+    try {
+      const payload = await this.jwtService.verify(token, {
+        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+      });
+
+      if (typeof payload === 'object' && 'email' in payload) {
+        return payload.email;
+      }
+      throw new BadRequestException();
+    } catch (error) {
+      if (error?.name === 'TokenExpiredError') {
+        throw new BadRequestException('Refresh token expired');
+      }
+      throw new BadRequestException('Bad refresh token');
+    }
+  }
+
   async requestResetPassword(
     resetPasswordDto: ResetPasswordRequestDto,
   ): Promise<Patient> {
@@ -171,6 +212,7 @@ export class AuthService {
     await this.mailService.sendResetConfirmation(patient, token);
     return patient;
   }
+
   public encodeConfirmationToken(patient: Patient): string {
     const payload: VerificationTokenPayload = {
       email: patient.email,
@@ -182,7 +224,8 @@ export class AuthService {
       )}s`,
     });
   }
-  public encodeLoginToken(patient: Patient): string {
+
+  public encodeAccessToken(patient: Patient): string {
     const payload: TokenPayload = { id: patient.id, email: patient.email };
     return this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_LOGIN_TOKEN_SECRET'),
@@ -191,6 +234,17 @@ export class AuthService {
       )}s`,
     });
   }
+
+  public encodeRefreshToken(patient: Patient): string {
+    const payload: TokenPayload = { id: patient.id, email: patient.email };
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+      expiresIn: `${this.configService.get(
+        'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
+      )}s`,
+    });
+  }
+
   public async encodeResetToken(patient: Patient): Promise<string> {
     const payload: TokenPayload = { id: patient.id, email: patient.email };
     const secret = await this.generateResetSecret(patient);
@@ -202,6 +256,7 @@ export class AuthService {
     });
     return token;
   }
+
   public async generateResetSecret(patient: Patient): Promise<string> {
     const secret =
       patient.id +
