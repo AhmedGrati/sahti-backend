@@ -33,6 +33,11 @@ export class TranscriptionController {
     );
   }
 
+  @Get('by-patient')
+  findAllByPatientId(@Query('patientId') patientId: string) {
+    return this.transcriptionService.findAllByPatientId(+patientId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.transcriptionService.findOne(+id);

@@ -2,7 +2,6 @@ import {
   BeforeInsert,
   Column,
   Entity,
-  OneToMany,
   PrimaryGeneratedColumn,
   TableInheritance,
 } from 'typeorm';
@@ -11,8 +10,6 @@ import { Gender } from './gender.entity';
 import { classToPlain, Exclude } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
 import { RoleEnum } from './role.enum';
-import { Transcription } from 'src/transcription/entities/transcription.entity';
-
 @Entity()
 @TableInheritance({ column: { type: 'varchar', name: 'type' } })
 export class Patient {
@@ -73,8 +70,6 @@ export class Patient {
   @Column()
   socialStatus: string; //student working etc
 
-  @OneToMany(() => Transcription, (transcription) => transcription.patient)
-  transcriptions: Transcription[];
   @BeforeInsert()
   async hashPassword() {
     const salt = await bcrypt.genSalt();

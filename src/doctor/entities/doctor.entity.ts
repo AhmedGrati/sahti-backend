@@ -1,5 +1,4 @@
-import { MedicalCheckUp } from 'src/medical-check-up/entities/medical-check-up.entity';
-import { ChildEntity, Column, Entity, OneToMany } from 'typeorm';
+import { ChildEntity, Column, Entity } from 'typeorm';
 import { Patient } from '../../patient/entities/patient.entity';
 
 @Entity()
@@ -19,7 +18,4 @@ export class Doctor extends Patient {
 
   @Column({ nullable: true })
   officeLocalisation: string;
-
-  @OneToMany(() => MedicalCheckUp, (medicalCheckUp) => medicalCheckUp.doctor)
-  medicalCheckUps: MedicalCheckUp[];
 }

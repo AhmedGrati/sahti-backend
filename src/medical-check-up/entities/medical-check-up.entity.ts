@@ -1,6 +1,14 @@
-import { Doctor } from 'src/doctor/entities/doctor.entity';
+import { Doctor } from '../../doctor/entities/doctor.entity';
 import { TimestampEntites } from 'src/generics/timestamp.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Transcription } from '../../transcription/entities/transcription.entity';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Patient } from 'src/patient/entities/patient.entity';
 
 @Entity()
 export class MedicalCheckUp extends TimestampEntites {
@@ -9,6 +17,15 @@ export class MedicalCheckUp extends TimestampEntites {
   @Column()
   additionalInformation: string;
 
-  @ManyToOne(() => Doctor, (doctor) => doctor.medicalCheckUps)
+  @ManyToOne(() => Doctor)
   doctor: Doctor;
+
+  @ManyToOne(() => Patient)
+  patient: Patient;
+
+  @OneToOne(
+    () => Transcription,
+    (transcription) => transcription.medicalCheckUp,
+  )
+  transcription: Transcription;
 }

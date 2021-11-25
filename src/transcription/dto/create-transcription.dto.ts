@@ -1,10 +1,7 @@
 import { IsNotEmpty } from 'class-validator';
 
 export class CreateTranscriptionDto {
-  additionalInformation: string;
+  remarks: string;
   @IsNotEmpty()
   medicamentsIdList: number[];
-
-  @IsNotEmpty()
-  patientId: number;
 }

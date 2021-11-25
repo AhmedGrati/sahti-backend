@@ -18,18 +18,15 @@ export class TranscriptionService {
     private readonly patientService: PatientService,
   ) {}
   async create(createTranscriptionDto: CreateTranscriptionDto) {
-    const { additionalInformation, medicamentsIdList, patientId } =
-      createTranscriptionDto;
+    const { remarks, medicamentsIdList } = createTranscriptionDto;
     const transcription = await this.transcriptionRepository.create({
-      additionalInformation,
+      remarks,
     });
 
     const medicaments = await this.medicamentService.findByIdList(
       medicamentsIdList,
     );
-    const patient = await this.patientService.findOne(patientId);
     transcription.medicaments = medicaments;
-    transcription.patient = patient;
     return this.transcriptionRepository.save(transcription);
   }
 
@@ -50,17 +47,14 @@ export class TranscriptionService {
   }
 
   async update(id: number, updateTranscriptionDto: UpdateTranscriptionDto) {
-    const { medicamentsIdList, additionalInformation, patientId } =
-      updateTranscriptionDto;
+    const { medicamentsIdList, remarks } = updateTranscriptionDto;
     const transaction = await this.findOne(id);
     if (transaction) {
       const medicaments = await this.medicamentService.findByIdList(
         medicamentsIdList,
       );
-      const patient = await this.patientService.findOne(patientId);
       transaction.medicaments = medicaments;
-      transaction.patient = patient;
-      transaction.additionalInformation = additionalInformation;
+      transaction.remarks = remarks;
       return this.transcriptionRepository.save(transaction);
     }
   }
@@ -77,12 +71,12 @@ export class TranscriptionService {
   ): Promise<Transcription[]> {
     return this.transcriptionRepository
       .createQueryBuilder('transcription')
-      .leftJoinAndSelect('transcription.patient', 'patient')
-      .where('transcription.patient.id = :patientId', { patientId })
+      .leftJoinAndSelect('transcription.medicalCheckUp', 'medicalCheckUp')
+      .innerJoinAndSelect('medicalCheckUp.patient', 'patient')
+      .where('patient.id = :patientId', { patientId })
       .andWhere('transcription.status = :status', {
         status: TranscriptionStatus.NOT_CHECKED,
       })
-      .printSql()
       .getMany();
   }
 
@@ -90,5 +84,16 @@ export class TranscriptionService {
     const transcription = await this.findOne(id);
     transcription.status = TranscriptionStatus.CHECKED;
     return this.transcriptionRepository.save(transcription);
+  }
+
+  async findAllByPatientId(patientId: number) {
+    return this.transcriptionRepository
+      .createQueryBuilder('transcription')
+      .leftJoinAndSelect('transcription.medicalCheckUp', 'medicalCheckUp')
+      .innerJoinAndSelect('medicalCheckUp.patient', 'patient')
+      .where('patient.id = :patientId', {
+        patientId,
+      })
+      .getMany();
   }
 }
