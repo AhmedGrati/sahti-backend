@@ -10,6 +10,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { RedisCacheModule } from '../redis-cache/redis-cache.module';
 
 @Module({
   controllers: [AuthController],
@@ -28,6 +29,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       }),
       inject: [ConfigService],
     }),
+    RedisCacheModule,
   ],
 })
 export class AuthModule {}

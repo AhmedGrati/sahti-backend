@@ -25,10 +25,12 @@ import { ResetPasswordConfirmDto } from './dto/reset-password-confirm.dto';
 import * as crypto from 'crypto-js';
 import { RefreshTokenResponseDto } from './dto/refresh-token-response.dto';
 import { RefreshTokenRequestDto } from './dto/refresh-token-request.dto';
+import { RedisCacheService } from '../redis-cache/redis-cache.service';
 
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly redisCacheService: RedisCacheService,
     private readonly configService: ConfigService,
     private readonly mailService: MailService,
     private readonly jwtService: JwtService,
@@ -54,9 +56,15 @@ export class AuthService {
   ): Promise<RefreshTokenResponseDto> {
     const { refreshToken } = refreshTokenRequestDto;
     const userEmail = await this.decodeRefreshToken(refreshToken);
+    const cacheToken = await this.redisCacheService.get(userEmail);
+    if (cacheToken == null || cacheToken != refreshToken) {
+      throw new UnauthorizedException('Bad Refresh token');
+    }
     const patient = await this.patientService.findByEmail(userEmail);
     const refreshTokenUpdated = this.encodeRefreshToken(patient);
-    const accessToken = this.encodeAccessToken(patient);
+    const accessToken = await this.encodeAccessToken(patient);
+    await this.redisCacheService.set(userEmail, refreshTokenUpdated);
+
     return {
       refreshToken: refreshTokenUpdated,
       accessToken: accessToken,
@@ -68,6 +76,7 @@ export class AuthService {
     if (patient) {
       const accessToken = this.encodeAccessToken(patient);
       const refreshToken = this.encodeRefreshToken(patient);
+      await this.redisCacheService.set(email, refreshToken);
       const loginResponseDto: LoginResponseDto = {
         accessToken: accessToken,
         refreshToken: refreshToken,
