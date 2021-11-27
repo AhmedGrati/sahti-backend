@@ -26,6 +26,12 @@ import * as crypto from 'crypto-js';
 import { RefreshTokenResponseDto } from './dto/refresh-token-response.dto';
 import { RefreshTokenRequestDto } from './dto/refresh-token-request.dto';
 import { RedisCacheService } from '../redis-cache/redis-cache.service';
+import {
+  BAD_TOKEN_ERROR_MESSAGE,
+  EXPIRED_TOKEN_ERROR_MESSAGE,
+  USER_ALREADY_CONFIRMED_ERROR_MESSAGE,
+  USER_ALREADY_EXISTS_ERROR_MESSAGE,
+} from '../utils/constants';
 
 @Injectable()
 export class AuthService {
@@ -58,7 +64,7 @@ export class AuthService {
     const userEmail = await this.decodeRefreshToken(refreshToken);
     const cacheToken = await this.redisCacheService.get(userEmail);
     if (cacheToken == null || cacheToken != refreshToken) {
-      throw new UnauthorizedException('Bad Refresh token');
+      throw new UnauthorizedException(BAD_TOKEN_ERROR_MESSAGE);
     }
     const patient = await this.patientService.findByEmail(userEmail);
     const refreshTokenUpdated = this.encodeRefreshToken(patient);
@@ -91,7 +97,7 @@ export class AuthService {
     const userEmail = await this.decodeRefreshToken(refreshToken);
     const cachedToken = await this.redisCacheService.get(userEmail);
     if (cachedToken == null || cachedToken != refreshToken) {
-      throw new UnauthorizedException('Bad refresh token');
+      throw new UnauthorizedException(BAD_TOKEN_ERROR_MESSAGE);
     }
     await this.redisCacheService.del(userEmail);
   }
@@ -102,7 +108,7 @@ export class AuthService {
     );
     if (existPatient) {
       throw new HttpException(
-        'The User With Given Email Already Exists',
+        USER_ALREADY_EXISTS_ERROR_MESSAGE,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -143,7 +149,7 @@ export class AuthService {
     const email = await this.decodeConfirmationToken(confirmEmailDto.token);
     const patient = await this.patientService.findByEmail(email);
     if (patient.isEmailVerified) {
-      throw new BadRequestException('User Email already confirmed');
+      throw new BadRequestException(USER_ALREADY_CONFIRMED_ERROR_MESSAGE);
     }
     return await this.patientService.markEmailAsConfirmed(email);
   }
@@ -176,9 +182,9 @@ export class AuthService {
       throw new BadRequestException();
     } catch (error) {
       if (error?.name === 'TokenExpiredError') {
-        throw new BadRequestException('Email confirmation token expired');
+        throw new BadRequestException(EXPIRED_TOKEN_ERROR_MESSAGE);
       }
-      throw new BadRequestException('Bad confirmation token');
+      throw new BadRequestException(BAD_TOKEN_ERROR_MESSAGE);
     }
   }
 
@@ -195,9 +201,9 @@ export class AuthService {
           return payload.email;
         } catch (error) {
           if (error?.name === 'TokenExpiredError') {
-            throw new BadRequestException('Email confirmation token expired');
+            throw new BadRequestException(EXPIRED_TOKEN_ERROR_MESSAGE);
           }
-          throw new BadRequestException('Bad confirmation token');
+          throw new BadRequestException(BAD_TOKEN_ERROR_MESSAGE);
         }
       }
     }
@@ -215,9 +221,9 @@ export class AuthService {
       throw new BadRequestException();
     } catch (error) {
       if (error?.name === 'TokenExpiredError') {
-        throw new BadRequestException('Refresh token expired');
+        throw new BadRequestException(EXPIRED_TOKEN_ERROR_MESSAGE);
       }
-      throw new BadRequestException('Bad refresh token');
+      throw new BadRequestException(BAD_TOKEN_ERROR_MESSAGE);
     }
   }
 
