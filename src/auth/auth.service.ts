@@ -61,7 +61,7 @@ export class AuthService {
     refreshTokenRequestDto: RefreshTokenRequestDto,
   ): Promise<RefreshTokenResponseDto> {
     const { refreshToken } = refreshTokenRequestDto;
-    const userEmail = await this.decodeRefreshToken(refreshToken);
+    const userEmail = await this.verifyRefreshToken(refreshToken);
     const cacheToken = await this.redisCacheService.get(userEmail);
     if (cacheToken == null || cacheToken != refreshToken) {
       throw new UnauthorizedException(BAD_TOKEN_ERROR_MESSAGE);
@@ -94,7 +94,7 @@ export class AuthService {
   }
   async logout(refreshTokenRequestDto: RefreshTokenRequestDto): Promise<void> {
     const { refreshToken } = refreshTokenRequestDto;
-    const userEmail = await this.decodeRefreshToken(refreshToken);
+    const userEmail = await this.verifyRefreshToken(refreshToken);
     const cachedToken = await this.redisCacheService.get(userEmail);
     if (cachedToken == null || cachedToken != refreshToken) {
       throw new UnauthorizedException(BAD_TOKEN_ERROR_MESSAGE);
@@ -146,7 +146,7 @@ export class AuthService {
   public async confirmEmail(
     confirmEmailDto: ConfirmEmailDto,
   ): Promise<Patient> {
-    const email = await this.decodeConfirmationToken(confirmEmailDto.token);
+    const email = await this.verifyConfirmationToken(confirmEmailDto.token);
     const patient = await this.patientService.findByEmail(email);
     if (patient.isEmailVerified) {
       throw new BadRequestException(USER_ALREADY_CONFIRMED_ERROR_MESSAGE);
@@ -158,7 +158,7 @@ export class AuthService {
     resetPasswordConfirmDto: ResetPasswordConfirmDto,
     token: string,
   ): Promise<Patient> {
-    const email = await this.decodeResetToken(token);
+    const email = await this.verifyResetToken(token);
     if (email) {
       const patient = await this.patientService.findByEmail(email);
       const passwordHash = await bcrypt.hash(
@@ -170,7 +170,7 @@ export class AuthService {
     throw new BadRequestException();
   }
 
-  public async decodeConfirmationToken(token: string): Promise<string> {
+  public async verifyConfirmationToken(token: string): Promise<string> {
     try {
       const payload = await this.jwtService.verify(token, {
         secret: this.configService.get('JWT_VERIFICATION_TOKEN_SECRET'),
@@ -188,7 +188,7 @@ export class AuthService {
     }
   }
 
-  public async decodeResetToken(token: string): Promise<string> {
+  public async verifyResetToken(token: string): Promise<string> {
     const payload = this.jwtService.decode(token);
     if (typeof payload === 'object' && 'email' in payload) {
       const patient = await this.patientService.findByEmail(payload.email);
@@ -209,7 +209,7 @@ export class AuthService {
     }
     throw new BadRequestException();
   }
-  public async decodeRefreshToken(token: string): Promise<string> {
+  public async verifyRefreshToken(token: string): Promise<string> {
     try {
       const payload = await this.jwtService.verify(token, {
         secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
