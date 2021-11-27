@@ -114,7 +114,7 @@ export class AuthService {
     }
     const patient = await this.signUpFactory(signUpDto);
     const confirmToken = this.encodeConfirmationToken(patient);
-    await this.mailService.sendUserConfirmation(patient, confirmToken);
+    this.mailService.sendUserConfirmation(patient, confirmToken);
     return patient;
   }
 
@@ -233,7 +233,7 @@ export class AuthService {
     const { email } = resetPasswordDto;
     const patient = await this.patientService.findByEmail(email);
     const token = await this.encodeResetToken(patient);
-    await this.mailService.sendResetConfirmation(patient, token);
+    this.mailService.sendResetConfirmation(patient, token);
     return patient;
   }
 
