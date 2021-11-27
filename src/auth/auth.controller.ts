@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/sign-up-dto';
 import ConfirmEmailDto from './dto/confirm-email.dto';
@@ -19,6 +19,10 @@ export class AuthController {
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+  @Delete('logout')
+  async logout(@Body() refreshTokenRequestDto: RefreshTokenRequestDto) {
+    return this.authService.logout(refreshTokenRequestDto);
   }
 
   @Post('confirm')

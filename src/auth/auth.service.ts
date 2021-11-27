@@ -86,6 +86,15 @@ export class AuthService {
     }
     throw new UnauthorizedException();
   }
+  async logout(refreshTokenRequestDto: RefreshTokenRequestDto): Promise<void> {
+    const { refreshToken } = refreshTokenRequestDto;
+    const userEmail = await this.decodeRefreshToken(refreshToken);
+    const cachedToken = await this.redisCacheService.get(userEmail);
+    if (cachedToken == null || cachedToken != refreshToken) {
+      throw new UnauthorizedException('Bad refresh token');
+    }
+    await this.redisCacheService.del(userEmail);
+  }
 
   async signUp(signUpDto: SignUpDto): Promise<Patient> {
     const existPatient = await this.patientService.userExistsByEmail(
