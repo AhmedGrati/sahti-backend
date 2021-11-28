@@ -1,8 +1,7 @@
-import { RoleEnum } from '../../patient/entities/role.enum';
+import { Patient } from '../../patient/entities/patient.entity';
 
 export class LoginResponseDto {
   accessToken: string;
   refreshToken: string;
-  role: RoleEnum;
-  //TODO : change role to user entity
+  patient: Patient;
 }

@@ -112,7 +112,7 @@ export class AuthService {
       const loginResponseDto: LoginResponseDto = {
         accessToken: accessToken,
         refreshToken: refreshToken,
-        role: patient.role,
+        patient: patient,
       };
       return loginResponseDto;
     }
