@@ -16,7 +16,6 @@ import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service';
 import { RoleEnum } from '../patient/entities/role.enum';
 import ConfirmEmailDto from './dto/confirm-email.dto';
-import VerificationTokenPayload from './entities/verificationTokenPayload.interface';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -32,6 +31,10 @@ import {
   USER_ALREADY_CONFIRMED_ERROR_MESSAGE,
   USER_ALREADY_EXISTS_ERROR_MESSAGE,
 } from '../utils/constants';
+import { AuthTokenStrategy } from './strategies/auth-strategy/auth-token-strategy.interface';
+import { ConfirmationTokenStrategy } from './strategies/auth-strategy/confirmation-token-strategy';
+import { RefreshTokenStrategy } from './strategies/auth-strategy/refresh-token-strategy';
+import { AccessTokenStrategy } from './strategies/auth-strategy/access-token-strategy';
 
 @Injectable()
 export class AuthService {
@@ -61,14 +64,27 @@ export class AuthService {
     refreshTokenRequestDto: RefreshTokenRequestDto,
   ): Promise<RefreshTokenResponseDto> {
     const { refreshToken } = refreshTokenRequestDto;
-    const userEmail = await this.verifyRefreshToken(refreshToken);
+    const userEmail = await this.verifyToken(
+      refreshToken,
+      new RefreshTokenStrategy(this.configService),
+    );
     const cacheToken = await this.redisCacheService.get(userEmail);
     if (cacheToken == null || cacheToken != refreshToken) {
       throw new UnauthorizedException(BAD_TOKEN_ERROR_MESSAGE);
     }
     const patient = await this.patientService.findByEmail(userEmail);
-    const refreshTokenUpdated = this.encodeRefreshToken(patient);
-    const accessToken = await this.encodeAccessToken(patient);
+    const tokenPayload: TokenPayload = {
+      id: patient.id,
+      email: patient.email,
+    };
+    const accessToken = this.encodeToken(
+      tokenPayload,
+      new AccessTokenStrategy(this.configService),
+    );
+    const refreshTokenUpdated = this.encodeToken(
+      tokenPayload,
+      new RefreshTokenStrategy(this.configService),
+    );
     await this.redisCacheService.set(userEmail, refreshTokenUpdated);
 
     return {
@@ -80,8 +96,18 @@ export class AuthService {
     const { email, password } = loginDto;
     const patient = await this.validateUser(email, password);
     if (patient) {
-      const accessToken = this.encodeAccessToken(patient);
-      const refreshToken = this.encodeRefreshToken(patient);
+      const tokenPayload: TokenPayload = {
+        id: patient.id,
+        email: patient.email,
+      };
+      const accessToken = this.encodeToken(
+        tokenPayload,
+        new AccessTokenStrategy(this.configService),
+      );
+      const refreshToken = this.encodeToken(
+        tokenPayload,
+        new RefreshTokenStrategy(this.configService),
+      );
       await this.redisCacheService.set(email, refreshToken);
       const loginResponseDto: LoginResponseDto = {
         accessToken: accessToken,
@@ -94,7 +120,10 @@ export class AuthService {
   }
   async logout(refreshTokenRequestDto: RefreshTokenRequestDto): Promise<void> {
     const { refreshToken } = refreshTokenRequestDto;
-    const userEmail = await this.verifyRefreshToken(refreshToken);
+    const userEmail = await this.verifyToken(
+      refreshToken,
+      new RefreshTokenStrategy(this.configService),
+    );
     const cachedToken = await this.redisCacheService.get(userEmail);
     if (cachedToken == null || cachedToken != refreshToken) {
       throw new UnauthorizedException(BAD_TOKEN_ERROR_MESSAGE);
@@ -113,7 +142,11 @@ export class AuthService {
       );
     }
     const patient = await this.signUpFactory(signUpDto);
-    const confirmToken = this.encodeConfirmationToken(patient);
+    const payload: TokenPayload = { id: patient.id, email: patient.email };
+    const confirmToken = this.encodeToken(
+      payload,
+      new ConfirmationTokenStrategy(this.configService),
+    );
     this.mailService.sendUserConfirmation(patient, confirmToken);
     return patient;
   }
@@ -146,7 +179,10 @@ export class AuthService {
   public async confirmEmail(
     confirmEmailDto: ConfirmEmailDto,
   ): Promise<Patient> {
-    const email = await this.verifyConfirmationToken(confirmEmailDto.token);
+    const email = await this.verifyToken(
+      confirmEmailDto.token,
+      new ConfirmationTokenStrategy(this.configService),
+    );
     const patient = await this.patientService.findByEmail(email);
     if (patient.isEmailVerified) {
       throw new BadRequestException(USER_ALREADY_CONFIRMED_ERROR_MESSAGE);
@@ -169,11 +205,13 @@ export class AuthService {
     }
     throw new BadRequestException();
   }
-
-  public async verifyConfirmationToken(token: string): Promise<string> {
+  public async verifyToken(
+    token: string,
+    authTokenStrategy: AuthTokenStrategy,
+  ): Promise<string> {
     try {
       const payload = await this.jwtService.verify(token, {
-        secret: this.configService.get('JWT_VERIFICATION_TOKEN_SECRET'),
+        secret: authTokenStrategy.getSecret(),
       });
 
       if (typeof payload === 'object' && 'email' in payload) {
@@ -187,7 +225,6 @@ export class AuthService {
       throw new BadRequestException(BAD_TOKEN_ERROR_MESSAGE);
     }
   }
-
   public async verifyResetToken(token: string): Promise<string> {
     const payload = this.jwtService.decode(token);
     if (typeof payload === 'object' && 'email' in payload) {
@@ -209,23 +246,6 @@ export class AuthService {
     }
     throw new BadRequestException();
   }
-  public async verifyRefreshToken(token: string): Promise<string> {
-    try {
-      const payload = await this.jwtService.verify(token, {
-        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
-      });
-
-      if (typeof payload === 'object' && 'email' in payload) {
-        return payload.email;
-      }
-      throw new BadRequestException();
-    } catch (error) {
-      if (error?.name === 'TokenExpiredError') {
-        throw new BadRequestException(EXPIRED_TOKEN_ERROR_MESSAGE);
-      }
-      throw new BadRequestException(BAD_TOKEN_ERROR_MESSAGE);
-    }
-  }
 
   async requestResetPassword(
     resetPasswordDto: ResetPasswordRequestDto,
@@ -237,35 +257,13 @@ export class AuthService {
     return patient;
   }
 
-  public encodeConfirmationToken(patient: Patient): string {
-    const payload: VerificationTokenPayload = {
-      email: patient.email,
-    };
+  public encodeToken(
+    payload: TokenPayload,
+    authTokenStrategy: AuthTokenStrategy,
+  ): string {
     return this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_VERIFICATION_TOKEN_SECRET'),
-      expiresIn: `${this.configService.get(
-        'JWT_VERIFICATION_TOKEN_EXPIRATION_TIME',
-      )}s`,
-    });
-  }
-
-  public encodeAccessToken(patient: Patient): string {
-    const payload: TokenPayload = { id: patient.id, email: patient.email };
-    return this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_LOGIN_TOKEN_SECRET'),
-      expiresIn: `${this.configService.get(
-        'JWT_LOGIN_TOKEN_EXPIRATION_TIME',
-      )}s`,
-    });
-  }
-
-  public encodeRefreshToken(patient: Patient): string {
-    const payload: TokenPayload = { id: patient.id, email: patient.email };
-    return this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
-      expiresIn: `${this.configService.get(
-        'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
-      )}s`,
+      secret: authTokenStrategy.getSecret(),
+      expiresIn: authTokenStrategy.getExpirationTime(),
     });
   }
 
