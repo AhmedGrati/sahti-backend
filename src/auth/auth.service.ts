@@ -132,8 +132,9 @@ export class AuthService {
   }
 
   async signUp(signUpDto: SignUpDto): Promise<Patient> {
-    const existPatient = await this.patientService.userExistsByEmail(
+    const existPatient = await this.patientService.userExistsByCinOrEmail(
       signUpDto.patient.email,
+      signUpDto.patient.cin,
     );
     if (existPatient) {
       throw new HttpException(
