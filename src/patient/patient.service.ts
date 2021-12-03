@@ -41,6 +41,17 @@ export class PatientService {
   async userExistsByEmail(userEmail: string): Promise<boolean> {
     return (await this.findByEmail(userEmail)) != null;
   }
+  async userExistsByCinOrEmail(
+    userEmail: string,
+    userCin: string,
+  ): Promise<boolean> {
+    return (await this.findByEmailOrCin(userEmail, userCin)) != null;
+  }
+  async findByEmailOrCin(userEmail: string, userCin: string): Promise<Patient> {
+    return await this.patientRepository.findOne({
+      where: [{ email: userEmail }, { cin: userCin }],
+    });
+  }
   async findByEmail(userEmail: string): Promise<Patient> {
     return await this.patientRepository.findOne({
       where: { email: userEmail },
