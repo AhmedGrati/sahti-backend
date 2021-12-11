@@ -21,19 +21,29 @@ export class TechnicianService {
     return this.technicianRepository.save(technician);
   }
 
-  findAll() {
-    return `This action returns all technician`;
+  async findAll(): Promise<Technician[]> {
+    return await this.technicianRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} technician`;
+  async findOne(id: number): Promise<Technician> {
+    return await this.technicianRepository.findOne(id);
   }
 
-  update(id: number, updateTechnicianDto: UpdateTechnicianDto) {
-    return `This action updates a #${id} technician`;
+  async update(
+    id: number,
+    updateTechnicianDto: UpdateTechnicianDto,
+  ): Promise<Technician> {
+    const patient = await this.technicianRepository.preload({
+      id,
+      ...updateTechnicianDto,
+    });
+    return this.technicianRepository.save(patient);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} technician`;
+  async softDelete(id: number) {
+    return await this.technicianRepository.softDelete(id);
+  }
+  async restore(id: number) {
+    return await this.technicianRepository.restore(id);
   }
 }
