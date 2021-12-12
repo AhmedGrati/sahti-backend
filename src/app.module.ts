@@ -18,6 +18,8 @@ import { LoggerMiddleware } from './shared/middlewares/logger.middleware';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpErrorFilter } from './shared/filters/http-error.filter';
 import { RedisCacheModule } from './redis-cache/redis-cache.module';
+import { TechnicalCheckUpModule } from './technical-check-up/technical-check-up.module';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import { RedisCacheModule } from './redis-cache/redis-cache.module';
     AuthModule,
     MailModule,
     RedisCacheModule,
+    TechnicalCheckUpModule,
+    FileModule,
   ],
   controllers: [AppController],
   providers: [
