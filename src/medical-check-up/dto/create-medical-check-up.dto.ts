@@ -3,5 +3,5 @@ import { CreateTranscriptionDto } from 'src/transcription/dto/create-transcripti
 export class CreateMedicalCheckUpDto extends CreateTranscriptionDto {
   additionalInformation: string;
   doctorId: number;
-  patientId: number;
+  medicalRecordId: number;
 }

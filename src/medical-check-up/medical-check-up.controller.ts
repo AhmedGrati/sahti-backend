@@ -11,7 +11,7 @@ import { MedicalCheckUpService } from './medical-check-up.service';
 import { CreateMedicalCheckUpDto } from './dto/create-medical-check-up.dto';
 // import { UpdateMedicalCheckUpDto } from './dto/update-medical-check-up.dto';
 
-@Controller('medical-check-up')
+@Controller('api/medical-check-ups')
 export class MedicalCheckUpController {
   constructor(private readonly medicalCheckUpService: MedicalCheckUpService) {}
 
@@ -28,6 +28,11 @@ export class MedicalCheckUpController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.medicalCheckUpService.findOne(+id);
+  }
+
+  @Get('medical-record/by-patient-id/:id')
+  buildMedicalRecordByPatientId(@Param('id') patientId: string) {
+    return this.medicalCheckUpService.buildMedicalRecord(+patientId);
   }
 
   // @Patch(':id')

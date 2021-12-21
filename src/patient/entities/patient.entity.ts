@@ -2,6 +2,7 @@ import {
   BeforeInsert,
   Column,
   Entity,
+  OneToOne,
   PrimaryGeneratedColumn,
   TableInheritance,
 } from 'typeorm';
@@ -10,6 +11,7 @@ import { Gender } from './gender.entity';
 import { classToPlain, Exclude } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
 import { RoleEnum } from './role.enum';
+import { MedicalRecord } from 'src/medical-record/entities/medical-record.entity';
 @Entity()
 @TableInheritance({ column: { type: 'varchar', name: 'type' } })
 export class Patient {
@@ -69,6 +71,9 @@ export class Patient {
 
   @Column()
   socialStatus: string; //student working etc
+
+  @OneToOne(() => MedicalRecord, (medicalRecord) => medicalRecord.patient)
+  medicalRecord: MedicalRecord;
 
   @BeforeInsert()
   async hashPassword() {

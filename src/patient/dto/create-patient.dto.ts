@@ -8,11 +8,9 @@ import {
   Length,
 } from 'class-validator';
 import { Gender } from '../entities/gender.entity';
-import { PrimaryGeneratedColumn } from 'typeorm';
 import { RoleEnum } from '../entities/role.enum';
 
 export class CreatePatientDto {
-  @PrimaryGeneratedColumn()
   id: number;
 
   @IsNotEmpty()

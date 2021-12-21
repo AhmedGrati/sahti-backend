@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DoctorService } from 'src/doctor/doctor.service';
-import { PatientService } from 'src/patient/patient.service';
+import { MedicalRecordService } from 'src/medical-record/medical-record.service';
 import { TranscriptionService } from 'src/transcription/transcription.service';
 import { generateNotFoundErrorMessage } from 'src/utils/error-message-generator';
 import { Repository } from 'typeorm';
@@ -16,7 +16,7 @@ export class MedicalCheckUpService {
     private readonly medicalCheckUpRepository: Repository<MedicalCheckUp>,
     private readonly doctorService: DoctorService,
     private readonly transcriptionService: TranscriptionService,
-    private readonly patientService: PatientService,
+    private readonly medicalRecordService: MedicalRecordService,
   ) {}
   async create(
     createMedicalCheckUpDto: CreateMedicalCheckUpDto,
@@ -26,7 +26,7 @@ export class MedicalCheckUpService {
       doctorId,
       medicamentsIdList,
       remarks,
-      patientId,
+      medicalRecordId,
     } = createMedicalCheckUpDto;
     const transcription = await this.transcriptionService.create({
       medicamentsIdList,
@@ -37,12 +37,14 @@ export class MedicalCheckUpService {
     medicalCheckUp.transcription = transcription;
     const doctor = await this.doctorService.findOne(doctorId);
     medicalCheckUp.doctor = doctor;
-    const patient = await this.patientService.findOne(patientId);
-    medicalCheckUp.patient = patient;
+    const medicalRecord = await this.medicalRecordService.findOne(
+      medicalRecordId,
+    );
+    medicalCheckUp.medicalRecord = medicalRecord;
     return this.medicalCheckUpRepository.save(doctor);
   }
 
-  findAll(): Promise<MedicalCheckUp[]> {
+  async findAll(): Promise<MedicalCheckUp[]> {
     return this.medicalCheckUpRepository.find();
   }
 
@@ -69,11 +71,21 @@ export class MedicalCheckUpService {
   //   return this.medicalCheckUpRepository.save(medicalCheckUp);
   // }
 
-  softDelete(id: number) {
+  async softDelete(id: number) {
     return this.medicalCheckUpRepository.softDelete(id);
   }
 
-  restore(id: number) {
+  async restore(id: number) {
     return this.medicalCheckUpRepository.restore(id);
+  }
+
+  async buildMedicalRecord(patientId: number) {
+    return this.medicalCheckUpRepository
+      .createQueryBuilder('medicalCheckUp')
+      .leftJoinAndSelect('medicalCheckUp.medicalRecord', 'medicalRecord')
+      .leftJoinAndSelect('medicalRecord.patient', 'patient')
+      .leftJoinAndSelect('medicalCheckUp.transcription', 'transcription')
+      .where('medicalRecord.patient.id = :patientId', { patientId })
+      .getOne();
   }
 }

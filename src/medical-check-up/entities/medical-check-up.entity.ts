@@ -8,7 +8,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Patient } from 'src/patient/entities/patient.entity';
+import { MedicalRecord } from 'src/medical-record/entities/medical-record.entity';
 
 @Entity()
 export class MedicalCheckUp extends TimestampEntites {
@@ -16,12 +16,11 @@ export class MedicalCheckUp extends TimestampEntites {
   id: number;
   @Column()
   additionalInformation: string;
-
   @ManyToOne(() => Doctor)
   doctor: Doctor;
 
-  @ManyToOne(() => Patient)
-  patient: Patient;
+  @ManyToOne(() => MedicalRecord)
+  medicalRecord: MedicalRecord;
 
   @OneToOne(
     () => Transcription,
