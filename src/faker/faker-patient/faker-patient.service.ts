@@ -49,20 +49,6 @@ export class FakerPatientService {
             civilStatus = CivilStatusEnum.WIDOWED;
           }
           const socialStatus = 'Working';
-          console.log({
-            email,
-            password,
-            role,
-            firstName,
-            lastName,
-            birthday,
-            cin,
-            gender,
-            phoneNumber,
-            cnamId,
-            civilStatus,
-            socialStatus,
-          });
           return await this.patientService.create({
             email,
             password,
