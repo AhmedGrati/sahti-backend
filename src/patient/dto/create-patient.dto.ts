@@ -11,7 +11,7 @@ import { Gender } from '../entities/gender.entity';
 import { RoleEnum } from '../entities/role.enum';
 
 export class CreatePatientDto {
-  id: number;
+  // id: number;
 
   @IsNotEmpty()
   @IsEmail()
