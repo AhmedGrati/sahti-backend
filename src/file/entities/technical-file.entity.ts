@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { TechnicalCheckUp } from '../../technical-check-up/entities/technical-check-up.entity';
 
 @Entity()
 export class TechnicalFile {
@@ -10,4 +11,9 @@ export class TechnicalFile {
 
   @Column()
   public key: string;
+  @ManyToOne(
+    () => TechnicalCheckUp,
+    (technicalCheckUp) => technicalCheckUp.technicalFiles,
+  )
+  technicalCheckUp: TechnicalCheckUp;
 }

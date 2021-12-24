@@ -1,7 +1,7 @@
-import { Column, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TimestampEntites } from '../../generics/timestamp.entity';
 import { TechnicalFile } from '../../file/entities/technical-file.entity';
-
+@Entity()
 export class TechnicalCheckUp extends TimestampEntites {
   @PrimaryGeneratedColumn()
   id: number;
@@ -9,10 +9,9 @@ export class TechnicalCheckUp extends TimestampEntites {
   title: string;
   @Column()
   additionalInformation: string;
-  @JoinColumn()
-  @OneToOne(() => TechnicalFile, {
-    eager: true,
-    nullable: true,
-  })
-  public technicalFile: TechnicalFile;
+  @OneToMany(
+    () => TechnicalFile,
+    (technicalFile) => technicalFile.technicalCheckUp,
+  )
+  technicalFiles: TechnicalFile[];
 }

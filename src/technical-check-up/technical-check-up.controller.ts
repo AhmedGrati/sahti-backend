@@ -7,18 +7,15 @@ import {
   Param,
   Delete,
   UseInterceptors,
-  UploadedFile,
-  UseGuards,
+  UploadedFiles,
 } from '@nestjs/common';
 import { TechnicalCheckUpService } from './technical-check-up.service';
 import { CreateTechnicalCheckUpDto } from './dto/create-technical-check-up.dto';
 import { UpdateTechnicalCheckUpDto } from './dto/update-technical-check-up.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../shared/guards/roles.guard';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+// @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('technical-check-up')
 export class TechnicalCheckUpController {
   constructor(
@@ -26,16 +23,23 @@ export class TechnicalCheckUpController {
   ) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('technicalFile'))
+  @UseInterceptors(FilesInterceptor('technicalFiles'))
   create(
     @Body() createTechnicalCheckUpDto: CreateTechnicalCheckUpDto,
-    @UploadedFile() technicalFile: Express.Multer.File,
+    @UploadedFiles() technicalFiles: Array<Express.Multer.File>,
   ) {
     return this.technicalCheckUpService.create(
       createTechnicalCheckUpDto,
-      technicalFile.buffer,
-      technicalFile.filename,
+      technicalFiles,
     );
+  }
+  @Post('technical-files/:id')
+  @UseInterceptors(FilesInterceptor('technicalFiles'))
+  async addTechnicalFiles(
+    @Param('id') id,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
+    return this.technicalCheckUpService.addTechnicalFiles(id, files);
   }
 
   @Get()

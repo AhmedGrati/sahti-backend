@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common';
 import * as AWS from 'aws-sdk';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Pharmacy } from '../pharmacy/entities/pharmacy.entity';
 import { Repository } from 'typeorm';
 import { TechnicalFile } from './entities/technical-file.entity';
 import { Buffer } from 'buffer';
 import { v4 as uuid } from 'uuid';
+import { TechnicalFileDto } from './dto/technical-file.dto';
 
 @Injectable()
 export class FileService {
   constructor(
-    @InjectRepository(Pharmacy)
+    @InjectRepository(TechnicalFile)
     private readonly technicalFileRepository: Repository<TechnicalFile>,
     private readonly configService: ConfigService,
   ) {}
@@ -34,5 +34,16 @@ export class FileService {
     });
     await this.technicalFileRepository.save(newFile);
     return newFile;
+  }
+  async uploadFiles(files: TechnicalFileDto[]) {
+    const technicalFiles: TechnicalFile[] = [];
+    for (const file of files) {
+      const technicalFile = await this.uploadFile(
+        file.dataBuffer,
+        file.filename,
+      );
+      technicalFiles.push(technicalFile);
+    }
+    return technicalFiles;
   }
 }
