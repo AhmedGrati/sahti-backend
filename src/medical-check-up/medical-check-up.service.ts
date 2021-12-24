@@ -28,20 +28,24 @@ export class MedicalCheckUpService {
       remarks,
       medicalRecordId,
     } = createMedicalCheckUpDto;
+    const medicalCheckUp = await this.medicalCheckUpRepository.create({});
+    /********* Create Transcription */
     const transcription = await this.transcriptionService.create({
       medicamentsIdList,
       remarks,
     });
-    const medicalCheckUp = await this.medicalCheckUpRepository.create({});
-    medicalCheckUp.additionalInformation = additionalInformation;
     medicalCheckUp.transcription = transcription;
+    medicalCheckUp.additionalInformation = additionalInformation;
+    /************ Assign to a doctor */
     const doctor = await this.doctorService.findOne(doctorId);
     medicalCheckUp.doctor = doctor;
+    /************ Assign to medical Record */
     const medicalRecord = await this.medicalRecordService.findOne(
       medicalRecordId,
     );
     medicalCheckUp.medicalRecord = medicalRecord;
-    return this.medicalCheckUpRepository.save(doctor);
+    /************* Save to Database */
+    return this.medicalCheckUpRepository.save(medicalCheckUp);
   }
 
   async findAll(): Promise<MedicalCheckUp[]> {

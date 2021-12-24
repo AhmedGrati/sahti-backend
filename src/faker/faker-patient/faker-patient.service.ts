@@ -17,7 +17,8 @@ export class FakerPatientService {
   ) {}
 
   async seed() {
-    const seedNumber: number = this.configService.get<number>('SEED_NUMBER');
+    const seedNumber: number =
+      this.configService.get<number>('SEED_NUMBER') / 2;
     const currentPatients: Patient[] = await this.patientService.findAll();
     if (currentPatients.length < seedNumber) {
       await Array.from({ length: seedNumber }).map<Promise<Patient>>(

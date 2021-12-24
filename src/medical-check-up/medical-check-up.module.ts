@@ -16,5 +16,6 @@ import { MedicalRecordModule } from 'src/medical-record/medical-record.module';
   ],
   controllers: [MedicalCheckUpController],
   providers: [MedicalCheckUpService],
+  exports: [MedicalCheckUpService],
 })
 export class MedicalCheckUpModule {}

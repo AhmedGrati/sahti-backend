@@ -20,7 +20,7 @@ export class MedicalRecord {
   })
   bloodType: BloodType;
 
-  @OneToOne(() => Patient, (patient) => patient.medicalRecord)
+  @OneToOne(() => Patient, (patient) => patient.medicalRecord, { eager: true })
   @JoinColumn()
   patient: Patient;
 }
