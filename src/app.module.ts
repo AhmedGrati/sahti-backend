@@ -19,6 +19,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { HttpErrorFilter } from './shared/filters/http-error.filter';
 import { MedicalCheckUpModule } from './medical-check-up/medical-check-up.module';
 import { MedicalRecordModule } from './medical-record/medical-record.module';
+import { ChronicDiseaseModule } from './chronic-disease/chronic-disease.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { MedicalRecordModule } from './medical-record/medical-record.module';
     MailModule,
     MedicalCheckUpModule,
     MedicalRecordModule,
+    ChronicDiseaseModule,
   ],
   controllers: [AppController],
   providers: [

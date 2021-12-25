@@ -4,4 +4,5 @@ export class CreateMedicalCheckUpDto extends CreateTranscriptionDto {
   additionalInformation: string;
   doctorId: number;
   medicalRecordId: number;
+  namesOfChronicDiseases: string[];
 }

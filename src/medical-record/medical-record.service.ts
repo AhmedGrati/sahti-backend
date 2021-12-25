@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ChronicDiseaseService } from 'src/chronic-disease/chronic-disease.service';
 import { PatientService } from 'src/patient/patient.service';
 import { Repository } from 'typeorm';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
@@ -11,6 +12,7 @@ export class MedicalRecordService {
     @InjectRepository(MedicalRecord)
     private readonly medicalRecordRepository: Repository<MedicalRecord>,
     private readonly patientService: PatientService,
+    private readonly chronicDiseaseService: ChronicDiseaseService,
   ) {}
   async create(createMedicalRecordDto: CreateMedicalRecordDto) {
     const { patientId, bloodType } = createMedicalRecordDto;
@@ -36,5 +38,13 @@ export class MedicalRecordService {
 
   async softDelete(id: number) {
     return this.medicalRecordRepository.softDelete(id);
+  }
+
+  async assignChronicDiseases(id: number, names: string[]) {
+    const medicalRecord = await this.findOne(id);
+    const chronicDiseases =
+      await this.chronicDiseaseService.createMultipleChronicDiseases(names);
+    medicalRecord.chronicDiseases = chronicDiseases;
+    return await this.medicalRecordRepository.save(medicalRecord);
   }
 }

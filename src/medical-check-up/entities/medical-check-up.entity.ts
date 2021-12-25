@@ -16,10 +16,10 @@ export class MedicalCheckUp extends TimestampEntites {
   id: number;
   @Column()
   additionalInformation: string;
-  @ManyToOne(() => Doctor)
+  @ManyToOne(() => Doctor, { eager: true })
   doctor: Doctor;
 
-  @ManyToOne(() => MedicalRecord)
+  @ManyToOne(() => MedicalRecord, { eager: true })
   medicalRecord: MedicalRecord;
 
   @OneToOne(

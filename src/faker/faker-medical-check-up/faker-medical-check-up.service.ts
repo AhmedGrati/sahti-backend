@@ -42,6 +42,7 @@ export class FakerMedicalCheckUpService {
             remarks: 'Important Remarks',
             medicamentsIdList,
             additionalInformation: 'Additional Information',
+            namesOfChronicDiseases: ['Chron'],
           });
         });
       }

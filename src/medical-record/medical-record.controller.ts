@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { MedicalRecordService } from './medical-record.service';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
 
-@Controller('api/medical-records')
+@Controller('medical-records')
 export class MedicalRecordController {
   constructor(private readonly medicalRecordService: MedicalRecordService) {}
 

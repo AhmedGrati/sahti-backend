@@ -11,7 +11,7 @@ import { MedicalCheckUpService } from './medical-check-up.service';
 import { CreateMedicalCheckUpDto } from './dto/create-medical-check-up.dto';
 // import { UpdateMedicalCheckUpDto } from './dto/update-medical-check-up.dto';
 
-@Controller('api/medical-check-ups')
+@Controller('medical-check-ups')
 export class MedicalCheckUpController {
   constructor(private readonly medicalCheckUpService: MedicalCheckUpService) {}
 

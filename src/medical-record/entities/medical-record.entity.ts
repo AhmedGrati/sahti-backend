@@ -1,8 +1,11 @@
+import { ChronicDisease } from 'src/chronic-disease/entities/chronic-disease.entity';
 import { Patient } from 'src/patient/entities/patient.entity';
 import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -23,4 +26,11 @@ export class MedicalRecord {
   @OneToOne(() => Patient, (patient) => patient.medicalRecord, { eager: true })
   @JoinColumn()
   patient: Patient;
+
+  @ManyToMany(
+    () => ChronicDisease,
+    (chronicDisease) => chronicDisease.medicalRecords,
+  )
+  @JoinTable()
+  chronicDiseases: ChronicDisease[];
 }

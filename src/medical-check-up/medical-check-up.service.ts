@@ -27,6 +27,7 @@ export class MedicalCheckUpService {
       medicamentsIdList,
       remarks,
       medicalRecordId,
+      namesOfChronicDiseases,
     } = createMedicalCheckUpDto;
     const medicalCheckUp = await this.medicalCheckUpRepository.create({});
     /********* Create Transcription */
@@ -40,8 +41,9 @@ export class MedicalCheckUpService {
     const doctor = await this.doctorService.findOne(doctorId);
     medicalCheckUp.doctor = doctor;
     /************ Assign to medical Record */
-    const medicalRecord = await this.medicalRecordService.findOne(
+    const medicalRecord = await this.medicalRecordService.assignChronicDiseases(
       medicalRecordId,
+      namesOfChronicDiseases,
     );
     medicalCheckUp.medicalRecord = medicalRecord;
     /************* Save to Database */
