@@ -20,6 +20,7 @@ import { HttpErrorFilter } from './shared/filters/http-error.filter';
 import { MedicalCheckUpModule } from './medical-check-up/medical-check-up.module';
 import { MedicalRecordModule } from './medical-record/medical-record.module';
 import { ChronicDiseaseModule } from './chronic-disease/chronic-disease.module';
+import { RedisCacheModule } from './redis-cache/redis-cache.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ChronicDiseaseModule } from './chronic-disease/chronic-disease.module';
     MedicalCheckUpModule,
     MedicalRecordModule,
     ChronicDiseaseModule,
+    RedisCacheModule,
   ],
   controllers: [AppController],
   providers: [

@@ -82,7 +82,7 @@ export class Patient {
   }
   @BeforeInsert()
   emailToLowerCase() {
-    this.email = this.email.toLowerCase();
+    this.email = this.email.toLowerCase().trim();
   }
   toJSON() {
     return classToPlain(this);
