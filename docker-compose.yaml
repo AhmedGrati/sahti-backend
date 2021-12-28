@@ -3,21 +3,19 @@ version: '3.7'
 services:
   sahti-backend:
     container_name: sahti-backend
-    build:
-      context: .
-      target: development
+    image: sahtiteam/sahti-backend:1.0.0
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     ports:
       - ${PORT}:${PORT}
-    command: npm run start:dev
     env_file:
       - .env
     networks:
       - webnet
     depends_on:
       - postgres
+      - redis
   redis:
     container_name: ${REDIS_HOST}
     image: 'redis:alpine'
