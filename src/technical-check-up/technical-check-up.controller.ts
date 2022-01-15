@@ -47,8 +47,13 @@ export class TechnicalCheckUpController {
   async addTechnicalFiles(
     @Param('id') id,
     @UploadedFiles() files: Array<Express.Multer.File>,
+    @CurrentUser() technician: Technician,
   ) {
-    return this.technicalCheckUpService.addTechnicalFiles(id, files);
+    return this.technicalCheckUpService.addTechnicalFiles(
+      id,
+      files,
+      technician,
+    );
   }
 
   @Get()

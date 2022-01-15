@@ -12,3 +12,5 @@ export const USER_ALREADY_CONFIRMED_ERROR_MESSAGE =
   'The User With Given Email Already Confirmed!';
 export const UNAUTHORIZED_TECHNICIAN_FILE_DELETE_ERROR_MESSAGE =
   'The Technician Authenticated Dose Not Own The File!';
+export const UNAUTHORIZED_TECHNICIAN_FILE_ADD_ERROR_MESSAGE =
+  'The Technician Authenticated Dose Not Own The Technical Check Up!';

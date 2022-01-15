@@ -16,6 +16,7 @@ import { TechnicalFileDto } from '../file/dto/technical-file.dto';
 import { Technician } from '../technician/entities/technician.entity';
 import {
   TECHNICAL_FILE_NOT_FOUND_ERROR_MESSAGE,
+  UNAUTHORIZED_TECHNICIAN_FILE_ADD_ERROR_MESSAGE,
   UNAUTHORIZED_TECHNICIAN_FILE_DELETE_ERROR_MESSAGE,
 } from '../utils/constants';
 
@@ -74,6 +75,7 @@ export class TechnicalCheckUpService {
   async addTechnicalFiles(
     technicalCheckUpId: number,
     files: Array<Express.Multer.File>,
+    technician: Technician,
   ) {
     const technicalFilesDTO: TechnicalFileDto[] = files.map((file) => {
       const filename = file.originalname;
@@ -87,6 +89,11 @@ export class TechnicalCheckUpService {
       where: { id: technicalCheckUpId },
       relations: ['technicalFiles'],
     });
+    if (technicalCheckUp.technician.id != technician.id) {
+      throw new UnauthorizedException(
+        UNAUTHORIZED_TECHNICIAN_FILE_ADD_ERROR_MESSAGE,
+      );
+    }
     technicalCheckUp.technicalFiles =
       technicalCheckUp.technicalFiles.concat(technicalFiles);
     return this.technicalCheckUpRepository.save(technicalCheckUp);
