@@ -1,4 +1,4 @@
-FROM node:14.16.1-alpine3.11 As development
+FROM node:16.13.1 As development
 
 LABEL maintainer="ahmedgrati1999@gmail.com"
 

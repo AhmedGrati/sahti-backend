@@ -14,5 +14,6 @@ import { PatientModule } from 'src/patient/patient.module';
     MedicamentModule,
     PatientModule,
   ],
+  exports: [TranscriptionService],
 })
 export class TranscriptionModule {}
