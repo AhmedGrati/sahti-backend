@@ -39,7 +39,11 @@ export class TechnicianController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.technicianService.remove(+id);
+  softDelete(@Param('id') id: string) {
+    return this.technicianService.softDelete(+id);
+  }
+  @Get('restore/:id')
+  restore(@Param('id') id: string) {
+    return this.technicianService.restore(+id);
   }
 }

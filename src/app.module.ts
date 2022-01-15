@@ -21,6 +21,8 @@ import { MedicalCheckUpModule } from './medical-check-up/medical-check-up.module
 import { MedicalRecordModule } from './medical-record/medical-record.module';
 import { ChronicDiseaseModule } from './chronic-disease/chronic-disease.module';
 import { RedisCacheModule } from './redis-cache/redis-cache.module';
+import { TechnicalCheckUpModule } from './technical-check-up/technical-check-up.module';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { RedisCacheModule } from './redis-cache/redis-cache.module';
     MedicalRecordModule,
     ChronicDiseaseModule,
     RedisCacheModule,
+    TechnicalCheckUpModule,
+    FileModule,
   ],
   controllers: [AppController],
   providers: [
