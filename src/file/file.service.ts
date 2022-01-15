@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as AWS from 'aws-sdk';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,6 +7,7 @@ import { TechnicalFile } from './entities/technical-file.entity';
 import { Buffer } from 'buffer';
 import { v4 as uuid } from 'uuid';
 import { TechnicalFileDto } from './dto/technical-file.dto';
+import { TECHNICAL_FILE_NOT_FOUND_ERROR_MESSAGE } from '../utils/constants';
 
 @Injectable()
 export class FileService {
@@ -45,5 +46,26 @@ export class FileService {
       technicalFiles.push(technicalFile);
     }
     return technicalFiles;
+  }
+  async removeTechnicalFile(fileId: number) {
+    const file = await this.technicalFileRepository.findOne(
+      { id: fileId },
+      { relations: ['technicalCheckUp'] },
+    );
+    if (file == null) {
+      throw new NotFoundException(TECHNICAL_FILE_NOT_FOUND_ERROR_MESSAGE);
+    }
+    await this.s3
+      .deleteObject({
+        Bucket: this.configService.get('AWS_BUCKET_NAME'),
+        Key: file.key,
+      })
+      .promise();
+    return await this.technicalFileRepository.delete(fileId);
+  }
+  async findById(id: number): Promise<TechnicalFile> {
+    return this.technicalFileRepository.findOne(id, {
+      relations: ['technicalCheckUp'],
+    });
   }
 }

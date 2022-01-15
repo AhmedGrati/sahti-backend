@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateTechnicalCheckUpDto } from './dto/create-technical-check-up.dto';
 import { UpdateTechnicalCheckUpDto } from './dto/update-technical-check-up.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +13,11 @@ import { FileService } from '../file/file.service';
 import { Buffer } from 'buffer';
 import { Express } from 'express';
 import { TechnicalFileDto } from '../file/dto/technical-file.dto';
+import { Technician } from '../technician/entities/technician.entity';
+import {
+  TECHNICAL_FILE_NOT_FOUND_ERROR_MESSAGE,
+  UNAUTHORIZED_TECHNICIAN_FILE_DELETE_ERROR_MESSAGE,
+} from '../utils/constants';
 
 @Injectable()
 export class TechnicalCheckUpService {
@@ -21,9 +30,11 @@ export class TechnicalCheckUpService {
   async create(
     createTechnicalCheckUpDto: CreateTechnicalCheckUpDto,
     files: Array<Express.Multer.File>,
+    technician: Technician,
   ) {
     const checkup: TechnicalCheckUp =
       await this.technicalCheckUpRepository.create(createTechnicalCheckUpDto);
+    checkup.technician = technician;
     const technicalFilesDTO: TechnicalFileDto[] = files.map((file) => {
       const filename = file.originalname;
       const dataBuffer = file.buffer;
@@ -46,12 +57,19 @@ export class TechnicalCheckUpService {
     return await this.technicalCheckUpRepository.findOne(+id);
   }
 
-  update(id: number, updateTechnicalCheckUpDto: UpdateTechnicalCheckUpDto) {
-    return `This action updates a #${id} technicalCheckUp`;
+  async update(
+    id: number,
+    updateTechnicalCheckUpDto: UpdateTechnicalCheckUpDto,
+  ) {
+    const technicalCheckUp = await this.technicalCheckUpRepository.preload({
+      id,
+      ...updateTechnicalCheckUpDto,
+    });
+    return this.technicalCheckUpRepository.save(technicalCheckUp);
   }
 
   remove(id: number) {
-    return `This action removes a #${id} technicalCheckUp`;
+    return this.technicalCheckUpRepository.softDelete(id);
   }
   async addTechnicalFiles(
     technicalCheckUpId: number,
@@ -72,5 +90,20 @@ export class TechnicalCheckUpService {
     technicalCheckUp.technicalFiles =
       technicalCheckUp.technicalFiles.concat(technicalFiles);
     return this.technicalCheckUpRepository.save(technicalCheckUp);
+  }
+  async deleteTechnicalFile(technicalFileId: number, technician: Technician) {
+    const file = await this.fileService.findById(technicalFileId);
+    if (file == null) {
+      throw new NotFoundException(TECHNICAL_FILE_NOT_FOUND_ERROR_MESSAGE);
+    }
+    if (file.technicalCheckUp.technician.id != technician.id) {
+      throw new UnauthorizedException(
+        UNAUTHORIZED_TECHNICIAN_FILE_DELETE_ERROR_MESSAGE,
+      );
+    }
+    return await this.fileService.removeTechnicalFile(technicalFileId);
+  }
+  async restore(id: number) {
+    return this.technicalCheckUpRepository.restore(id);
   }
 }

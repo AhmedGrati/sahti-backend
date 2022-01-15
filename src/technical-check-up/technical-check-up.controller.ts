@@ -8,14 +8,20 @@ import {
   Delete,
   UseInterceptors,
   UploadedFiles,
+  UseGuards,
 } from '@nestjs/common';
 import { TechnicalCheckUpService } from './technical-check-up.service';
 import { CreateTechnicalCheckUpDto } from './dto/create-technical-check-up.dto';
 import { UpdateTechnicalCheckUpDto } from './dto/update-technical-check-up.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
-
-// @UseGuards(JwtAuthGuard, RolesGuard)
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../shared/guards/roles.guard';
+import { Roles } from '../shared/decorators/roles.decorator';
+import { RoleEnum } from '../patient/entities/role.enum';
+import { CurrentUser } from '../shared/decorators/current-user.decorator';
+import { Technician } from '../technician/entities/technician.entity';
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('technical-check-up')
 export class TechnicalCheckUpController {
   constructor(
@@ -24,13 +30,16 @@ export class TechnicalCheckUpController {
 
   @Post()
   @UseInterceptors(FilesInterceptor('technicalFiles'))
+  @Roles(RoleEnum.TECHNICIAN)
   create(
     @Body() createTechnicalCheckUpDto: CreateTechnicalCheckUpDto,
     @UploadedFiles() technicalFiles: Array<Express.Multer.File>,
+    @CurrentUser() technician: Technician,
   ) {
     return this.technicalCheckUpService.create(
       createTechnicalCheckUpDto,
       technicalFiles,
+      technician,
     );
   }
   @Post('technical-files/:id')
@@ -60,8 +69,19 @@ export class TechnicalCheckUpController {
     return this.technicalCheckUpService.update(+id, updateTechnicalCheckUpDto);
   }
 
+  @Delete('technical-file/:id')
+  removeTechnicalFile(
+    @Param('id') id: string,
+    @CurrentUser() technician: Technician,
+  ) {
+    return this.technicalCheckUpService.deleteTechnicalFile(+id, technician);
+  }
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.technicalCheckUpService.remove(+id);
+  }
+  @Get('restore/:id')
+  restore(@Param('id') id: string) {
+    return this.technicalCheckUpService.restore(+id);
   }
 }
