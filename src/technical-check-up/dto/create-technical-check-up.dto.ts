@@ -5,4 +5,6 @@ export class CreateTechnicalCheckUpDto {
   title: string;
   @IsOptional()
   additionalInformation: string;
+  @IsNotEmpty()
+  patientId: number;
 }

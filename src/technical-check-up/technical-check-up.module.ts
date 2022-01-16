@@ -4,10 +4,15 @@ import { TechnicalCheckUpController } from './technical-check-up.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TechnicalCheckUp } from './entities/technical-check-up.entity';
 import { FileModule } from '../file/file.module';
+import { PatientModule } from '../patient/patient.module';
 
 @Module({
   controllers: [TechnicalCheckUpController],
   providers: [TechnicalCheckUpService],
-  imports: [TypeOrmModule.forFeature([TechnicalCheckUp]), FileModule],
+  imports: [
+    TypeOrmModule.forFeature([TechnicalCheckUp]),
+    FileModule,
+    PatientModule,
+  ],
 })
 export class TechnicalCheckUpModule {}

@@ -19,6 +19,7 @@ import {
   UNAUTHORIZED_TECHNICIAN_FILE_ADD_ERROR_MESSAGE,
   UNAUTHORIZED_TECHNICIAN_FILE_DELETE_ERROR_MESSAGE,
 } from '../utils/constants';
+import { PatientService } from '../patient/patient.service';
 
 @Injectable()
 export class TechnicalCheckUpService {
@@ -26,6 +27,7 @@ export class TechnicalCheckUpService {
     @InjectRepository(TechnicalCheckUp)
     private readonly technicalCheckUpRepository: Repository<TechnicalCheckUp>,
     private readonly fileService: FileService,
+    private readonly patientService: PatientService,
   ) {}
 
   async create(
@@ -36,6 +38,9 @@ export class TechnicalCheckUpService {
     const checkup: TechnicalCheckUp =
       await this.technicalCheckUpRepository.create(createTechnicalCheckUpDto);
     checkup.technician = technician;
+    const { patientId } = createTechnicalCheckUpDto;
+    const patient = await this.patientService.findOne(patientId);
+    checkup.medicalRecord = patient.medicalRecord;
     const technicalFilesDTO: TechnicalFileDto[] = files.map((file) => {
       const filename = file.originalname;
       const dataBuffer = file.buffer;

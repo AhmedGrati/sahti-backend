@@ -8,6 +8,7 @@ import {
 import { TimestampEntites } from '../../generics/timestamp.entity';
 import { TechnicalFile } from '../../file/entities/technical-file.entity';
 import { Technician } from '../../technician/entities/technician.entity';
+import { MedicalRecord } from '../../medical-record/entities/medical-record.entity';
 
 @Entity()
 export class TechnicalCheckUp extends TimestampEntites {
@@ -28,4 +29,7 @@ export class TechnicalCheckUp extends TimestampEntites {
     eager: true,
   })
   technician: Technician;
+
+  @ManyToOne(() => MedicalRecord, { eager: true })
+  medicalRecord: MedicalRecord;
 }

@@ -17,12 +17,14 @@ export class PatientService {
   }
 
   async findAll(): Promise<Patient[]> {
-    const patients = await this.patientRepository.find();
+    const patients = await this.patientRepository.find({
+      relations: ['medicalRecord'],
+    });
     return patients;
   }
 
   async findOne(id: number): Promise<Patient> {
-    return this.patientRepository.findOne(id);
+    return this.patientRepository.findOne(id, { relations: ['medicalRecord'] });
   }
 
   async update(
