@@ -47,4 +47,12 @@ export class MedicalRecordService {
     medicalRecord.chronicDiseases = chronicDiseases;
     return await this.medicalRecordRepository.save(medicalRecord);
   }
+
+  async findMedicalRecordByPatientId(patientId: number) {
+    return await this.medicalRecordRepository
+      .createQueryBuilder('medicalRecord')
+      .leftJoinAndSelect('medicalRecord.patient', 'patient')
+      .where('medicalRecord.patient.id = :patientId', { patientId })
+      .getOne();
+  }
 }

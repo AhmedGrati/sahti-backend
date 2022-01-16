@@ -16,6 +16,11 @@ export class MedicalRecordController {
     return this.medicalRecordService.findAll();
   }
 
+  @Get('patient/:patientId')
+  getByPatientId(@Param('patientId') patientId: string) {
+    return this.medicalRecordService.findMedicalRecordByPatientId(+patientId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.medicalRecordService.findOne(+id);
