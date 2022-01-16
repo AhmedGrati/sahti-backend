@@ -7,7 +7,7 @@ const port = process.env.PORT || 3000;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
-
+  app.enableCors({ origin: ['http://localhost:4200'] });
   const config = new DocumentBuilder()
     .setTitle('Sahti API Specifications')
     .setDescription('This is sahti backend API specifications')
