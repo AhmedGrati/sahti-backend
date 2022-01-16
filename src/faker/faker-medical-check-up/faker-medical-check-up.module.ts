@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { DoctorModule } from 'src/doctor/doctor.module';
 import { MedicalCheckUpModule } from 'src/medical-check-up/medical-check-up.module';
-import { MedicalRecordModule } from 'src/medical-record/medical-record.module';
 import { MedicamentModule } from 'src/medicament/medicament.module';
+import { PatientModule } from 'src/patient/patient.module';
 import { TranscriptionModule } from 'src/transcription/transcription.module';
 import { FakerMedicalCheckUpService } from './faker-medical-check-up.service';
 
@@ -14,7 +14,7 @@ import { FakerMedicalCheckUpService } from './faker-medical-check-up.service';
     DoctorModule,
     TranscriptionModule,
     MedicamentModule,
-    MedicalRecordModule,
+    PatientModule,
   ],
 })
 export class FakerMedicalCheckUpModule {}

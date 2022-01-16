@@ -26,7 +26,7 @@ export class MedicalCheckUpService {
       doctorId,
       medicamentsIdList,
       remarks,
-      medicalRecordId,
+      patientId,
       namesOfChronicDiseases,
     } = createMedicalCheckUpDto;
     const medicalCheckUp = await this.medicalCheckUpRepository.create({});
@@ -41,8 +41,10 @@ export class MedicalCheckUpService {
     const doctor = await this.doctorService.findOne(doctorId);
     medicalCheckUp.doctor = doctor;
     /************ Assign to medical Record */
-    const medicalRecord = await this.medicalRecordService.assignChronicDiseases(
-      medicalRecordId,
+    let medicalRecord =
+      await this.medicalRecordService.findMedicalRecordByPatientId(patientId);
+    medicalRecord = await this.medicalRecordService.assignChronicDiseases(
+      medicalRecord.id,
       namesOfChronicDiseases,
     );
     medicalCheckUp.medicalRecord = medicalRecord;
