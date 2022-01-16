@@ -118,4 +118,13 @@ export class TechnicalCheckUpService {
   async restore(id: number) {
     return this.technicalCheckUpRepository.restore(id);
   }
+  async findAllByPatientId(patientId: number) {
+    const patient = await this.patientService.findOne(patientId);
+    return await this.technicalCheckUpRepository.find({
+      relations: ['technician', 'technicalFiles', 'medicalRecord'],
+      where: {
+        medicalRecord: { id: patient.medicalRecord.id },
+      },
+    });
+  }
 }

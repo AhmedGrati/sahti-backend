@@ -51,4 +51,9 @@ export class MedicalCheckUpController {
   restore(@Param('id') id: string) {
     return this.medicalCheckUpService.restore(+id);
   }
+
+  @Get('by-patient/:id')
+  findAllByPatientId(@Param('id') patientId: string) {
+    return this.medicalCheckUpService.findAllByPatientId(+patientId);
+  }
 }

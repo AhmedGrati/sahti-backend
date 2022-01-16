@@ -87,6 +87,20 @@ export class MedicalCheckUpService {
     return this.medicalCheckUpRepository.restore(id);
   }
 
+  async findAllByPatientId(patientId: number) {
+    const medicalRecord =
+      await this.medicalRecordService.findMedicalRecordByPatientId(patientId);
+    return await this.medicalCheckUpRepository
+      .createQueryBuilder('medicalCheckUp')
+      .leftJoinAndSelect('medicalCheckUp.medicalRecord', 'medicalRecord')
+      .leftJoinAndSelect('medicalCheckUp.doctor', 'doctor')
+      .leftJoinAndSelect('medicalCheckUp.transcription', 'transcription')
+      .where('medicalCheckUp.medicalRecord.id = :medicalRecordId', {
+        medicalRecordId: medicalRecord.id,
+      })
+      .getMany();
+  }
+
   async buildMedicalRecord(patientId: number) {
     return this.medicalCheckUpRepository
       .createQueryBuilder('medicalCheckUp')

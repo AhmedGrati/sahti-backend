@@ -25,6 +25,10 @@ export class MedicalCheckUp extends TimestampEntites {
   @OneToOne(
     () => Transcription,
     (transcription) => transcription.medicalCheckUp,
+    { eager: true },
   )
   transcription: Transcription;
+
+  @Column()
+  controlDate: Date;
 }
