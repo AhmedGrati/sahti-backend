@@ -101,6 +101,18 @@ export class MedicalCheckUpService {
       .getMany();
   }
 
+  async findAllByDoctorId(doctorId: number) {
+    return await this.medicalCheckUpRepository
+      .createQueryBuilder('medicalCheckUp')
+      .leftJoinAndSelect('medicalCheckUp.medicalRecord', 'medicalRecord')
+      .leftJoinAndSelect('medicalCheckUp.doctor', 'doctor')
+      .leftJoinAndSelect('medicalCheckUp.transcription', 'transcription')
+      .where('medicalCheckUp.doctor.id = :doctorId', {
+        doctorId,
+      })
+      .getMany();
+  }
+
   async buildMedicalRecord(patientId: number) {
     return this.medicalCheckUpRepository
       .createQueryBuilder('medicalCheckUp')
