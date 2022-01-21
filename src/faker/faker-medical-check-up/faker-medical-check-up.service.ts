@@ -43,6 +43,7 @@ export class FakerMedicalCheckUpService {
             medicamentsIdList,
             additionalInformation: 'Additional Information',
             namesOfChronicDiseases: ['Chron'],
+            controlDate: new Date(),
           });
         });
       }

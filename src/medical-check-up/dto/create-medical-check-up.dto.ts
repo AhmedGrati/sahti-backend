@@ -10,4 +10,7 @@ export class CreateMedicalCheckUpDto extends CreateTranscriptionDto {
   patientId: number;
   @ApiProperty()
   namesOfChronicDiseases: string[];
+
+  @ApiProperty()
+  controlDate: Date;
 }
