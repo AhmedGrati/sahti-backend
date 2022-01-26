@@ -60,6 +60,7 @@ export class AuthService {
     }
     return null;
   }
+
   async refreshToken(
     refreshTokenRequestDto: RefreshTokenRequestDto,
   ): Promise<RefreshTokenResponseDto> {
@@ -92,6 +93,7 @@ export class AuthService {
       accessToken: accessToken,
     };
   }
+
   async login(loginDto: LoginDto): Promise<LoginResponseDto> {
     const { email, password } = loginDto;
     const patient = await this.validateUser(email, password);
@@ -118,6 +120,7 @@ export class AuthService {
     }
     throw new UnauthorizedException();
   }
+
   async logout(refreshTokenRequestDto: RefreshTokenRequestDto): Promise<void> {
     const { refreshToken } = refreshTokenRequestDto;
     const userEmail = await this.verifyToken(
@@ -206,6 +209,7 @@ export class AuthService {
     }
     throw new BadRequestException();
   }
+
   public async verifyToken(
     token: string,
     authTokenStrategy: AuthTokenStrategy,
@@ -226,6 +230,7 @@ export class AuthService {
       throw new BadRequestException(BAD_TOKEN_ERROR_MESSAGE);
     }
   }
+
   public async verifyResetToken(token: string): Promise<string> {
     const payload = this.jwtService.decode(token);
     if (typeof payload === 'object' && 'email' in payload) {
@@ -291,5 +296,13 @@ export class AuthService {
       this.configService.get('JWT_RESET_TOKEN_SECRET'),
     );
     return secretHash.toString();
+  }
+
+  async startResetPassword(token: string) {
+    const email = await this.verifyResetToken(token);
+    if (email) {
+      return email;
+    }
+    throw new BadRequestException(BAD_TOKEN_ERROR_MESSAGE);
   }
 }
