@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/sign-up-dto';
 import ConfirmEmailDto from './dto/confirm-email.dto';
@@ -39,6 +39,10 @@ export class AuthController {
     @Body() resetPasswordDto: ResetPasswordRequestDto,
   ) {
     return this.authService.requestResetPassword(resetPasswordDto);
+  }
+  @Get('reset/start/:token')
+  async startResetPassword(@Param('token') token: string) {
+    return this.authService.startResetPassword(token);
   }
 
   @Post('reset/confirm/:token')
