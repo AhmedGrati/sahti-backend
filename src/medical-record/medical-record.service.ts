@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChronicDiseaseService } from 'src/chronic-disease/chronic-disease.service';
+import { MedicalCheckUpService } from 'src/medical-check-up/medical-check-up.service';
 import { PatientService } from 'src/patient/patient.service';
+import { TechnicalCheckUpService } from 'src/technical-check-up/technical-check-up.service';
 import { Repository } from 'typeorm';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
+import { MedicalRecordResponse } from './dto/medical-record-response.dto';
 import { MedicalRecord } from './entities/medical-record.entity';
 
 @Injectable()
@@ -13,6 +16,9 @@ export class MedicalRecordService {
     private readonly medicalRecordRepository: Repository<MedicalRecord>,
     private readonly patientService: PatientService,
     private readonly chronicDiseaseService: ChronicDiseaseService,
+    @Inject(forwardRef(() => MedicalCheckUpService))
+    private readonly medicalCheckUpService: MedicalCheckUpService,
+    private readonly technicalCheckUpService: TechnicalCheckUpService,
   ) {}
   async create(createMedicalRecordDto: CreateMedicalRecordDto) {
     const { patientId, bloodType } = createMedicalRecordDto;
@@ -29,7 +35,33 @@ export class MedicalRecordService {
   }
 
   async findOne(id: number) {
-    return this.medicalRecordRepository.findOne({ where: { id } });
+    const medicalRecord = await this.medicalRecordRepository.findOne({
+      where: { id },
+    });
+    return await this.buildMedicalRecord(medicalRecord);
+  }
+
+  async buildMedicalRecord(
+    medicalRecord: MedicalRecord,
+  ): Promise<MedicalRecordResponse> {
+    const medicalCheckUps = await this.medicalCheckUpService.findAllByPatientId(
+      medicalRecord.patient.id,
+    );
+    const transcriptions =
+      this.medicalCheckUpService.extractTranscriptions(medicalCheckUps);
+    const technicalCheckUps =
+      await this.technicalCheckUpService.findAllByPatientId(
+        medicalRecord.patient.id,
+      );
+    const medicalRecordResponse: MedicalRecordResponse = {
+      transcriptions,
+      technicalCheckUps,
+      medicalCheckUps,
+      id: medicalRecord.id,
+      bloodType: medicalRecord.bloodType,
+      chronicDiseases: medicalRecord.chronicDiseases,
+    };
+    return medicalRecordResponse;
   }
 
   // update(id: number, updateMedicalRecordDto: UpdateMedicalRecordDto) {
@@ -54,5 +86,11 @@ export class MedicalRecordService {
       .leftJoinAndSelect('medicalRecord.patient', 'patient')
       .where('medicalRecord.patient.id = :patientId', { patientId })
       .getOne();
+  }
+  async buildMedicalRecordByPatientId(
+    patientId: number,
+  ): Promise<MedicalRecordResponse> {
+    const medicalRecord = await this.findMedicalRecordByPatientId(patientId);
+    return this.buildMedicalRecord(medicalRecord);
   }
 }

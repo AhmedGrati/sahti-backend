@@ -4,9 +4,6 @@ services:
   sahti-backend:
     container_name: sahti-backend
     image: sahtiteam/sahti-backend:1.0.0
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
     ports:
       - ${PORT}:${PORT}
     env_file:

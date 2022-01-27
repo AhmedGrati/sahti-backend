@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DoctorService } from 'src/doctor/doctor.service';
 import { MedicalRecordService } from 'src/medical-record/medical-record.service';
@@ -16,6 +21,7 @@ export class MedicalCheckUpService {
     private readonly medicalCheckUpRepository: Repository<MedicalCheckUp>,
     private readonly doctorService: DoctorService,
     private readonly transcriptionService: TranscriptionService,
+    @Inject(forwardRef(() => MedicalRecordService))
     private readonly medicalRecordService: MedicalRecordService,
   ) {}
   async create(
@@ -101,6 +107,14 @@ export class MedicalCheckUpService {
         medicalRecordId: medicalRecord.id,
       })
       .getMany();
+  }
+
+  extractTranscriptions(medicalCheckUps: MedicalCheckUp[]) {
+    const transcriptions = [];
+    for (let i = 0; i < medicalCheckUps.length; i++) {
+      transcriptions.push(medicalCheckUps[i].transcription);
+    }
+    return transcriptions;
   }
 
   async findAllByDoctorId(doctorId: number) {

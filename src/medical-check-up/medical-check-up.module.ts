@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MedicalCheckUpService } from './medical-check-up.service';
 import { MedicalCheckUpController } from './medical-check-up.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,8 +11,8 @@ import { MedicalRecordModule } from 'src/medical-record/medical-record.module';
   imports: [
     TypeOrmModule.forFeature([MedicalCheckUp]),
     DoctorModule,
+    forwardRef(() => MedicalRecordModule),
     TranscriptionModule,
-    MedicalRecordModule,
   ],
   controllers: [MedicalCheckUpController],
   providers: [MedicalCheckUpService],

@@ -14,5 +14,6 @@ import { PatientModule } from '../patient/patient.module';
     FileModule,
     PatientModule,
   ],
+  exports: [TechnicalCheckUpService],
 })
 export class TechnicalCheckUpModule {}

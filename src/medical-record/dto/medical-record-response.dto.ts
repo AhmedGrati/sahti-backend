@@ -12,13 +12,13 @@ export class MedicalRecordResponse {
   bloodType: BloodType;
 
   @ApiProperty()
-  transcription: Transcription[];
+  transcriptions: Transcription[];
 
   @ApiProperty()
   medicalCheckUps: MedicalCheckUp[];
 
   @ApiProperty()
-  technincalCheckUp: TechnicalCheckUp[];
+  technicalCheckUps: TechnicalCheckUp[];
 
   @ApiProperty()
   chronicDiseases: ChronicDisease[];

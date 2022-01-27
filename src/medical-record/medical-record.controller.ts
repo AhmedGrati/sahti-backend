@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { MedicalRecordService } from './medical-record.service';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
+import { MedicalRecordResponse } from './dto/medical-record-response.dto';
 
 @Controller('medical-records')
 export class MedicalRecordController {
@@ -17,12 +18,14 @@ export class MedicalRecordController {
   }
 
   @Get('patient/:patientId')
-  getByPatientId(@Param('patientId') patientId: string) {
-    return this.medicalRecordService.findMedicalRecordByPatientId(+patientId);
+  getByPatientId(
+    @Param('patientId') patientId: string,
+  ): Promise<MedicalRecordResponse> {
+    return this.medicalRecordService.buildMedicalRecordByPatientId(+patientId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Promise<MedicalRecordResponse> {
     return this.medicalRecordService.findOne(+id);
   }
   // @Patch(':id')
