@@ -19,8 +19,14 @@ export class MedicamentService {
     return this.medicamentRepository.save(medicament);
   }
 
-  async findAll(): Promise<Medicament[]> {
-    return this.medicamentRepository.find();
+  async findAll(filter = ''): Promise<Medicament[]> {
+    if (filter == '') {
+      return this.medicamentRepository.find();
+    }
+    filter = filter.toLowerCase();
+    return this.medicamentRepository.query(
+      `select * from medicament where lower("name") LIKE '${filter}%'`,
+    );
   }
 
   async findOne(id: number): Promise<Medicament> {
