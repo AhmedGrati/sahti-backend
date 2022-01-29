@@ -30,6 +30,7 @@ export class MedicalRecord {
   @ManyToMany(
     () => ChronicDisease,
     (chronicDisease) => chronicDisease.medicalRecords,
+    { eager: true },
   )
   @JoinTable()
   chronicDiseases: ChronicDisease[];
