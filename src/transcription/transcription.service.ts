@@ -90,7 +90,8 @@ export class TranscriptionService {
     return this.transcriptionRepository
       .createQueryBuilder('transcription')
       .leftJoinAndSelect('transcription.medicalCheckUp', 'medicalCheckUp')
-      .innerJoinAndSelect('medicalCheckUp.patient', 'patient')
+      .innerJoinAndSelect('medicalCheckUp.medicalRecord', 'medicalRecord')
+      .innerJoinAndSelect('medicalRecord.patient', 'patient')
       .where('patient.id = :patientId', {
         patientId,
       })
