@@ -27,7 +27,9 @@ export class Transcription extends TimestampEntites {
   })
   status: TranscriptionStatus;
 
-  @ManyToMany(() => Medicament, (medicament) => medicament.transcriptions)
+  @ManyToMany(() => Medicament, (medicament) => medicament.transcriptions, {
+    eager: true,
+  })
   @JoinTable()
   medicaments: Medicament[];
 
