@@ -69,7 +69,8 @@ export class TranscriptionService {
   async findListOfNonValidatedTranscriptions(
     patientId: number,
   ): Promise<Transcription[]> {
-    return this.transcriptionRepository
+    const result = [];
+    const transcriptions = await this.transcriptionRepository
       .createQueryBuilder('transcription')
       .leftJoinAndSelect('transcription.medicalCheckUp', 'medicalCheckUp')
       .innerJoinAndSelect('medicalCheckUp.medicalRecord', 'medicalRecord')
@@ -79,6 +80,11 @@ export class TranscriptionService {
         status: TranscriptionStatus.NOT_CHECKED,
       })
       .getMany();
+    for (let i = 0; i < transcriptions.length; i++) {
+      const transcription = await this.findOne(transcriptions[i].id);
+      result.push(transcription);
+    }
+    return result;
   }
 
   async checkTranscription(id: number) {
