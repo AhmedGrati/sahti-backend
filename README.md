@@ -53,4 +53,4 @@ docker-compose --version
 ```
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+The source code for the site is licensed under the [MIT](https://choosealicense.com/licenses/mit/) license, which you can find in the LICENSE.txt file. 
