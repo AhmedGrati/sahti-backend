@@ -46,7 +46,7 @@ docker-compose --version
   cd sahti-backend
 ```
 
-4- Install dependencies
+4- Run the project
 
 ```bash
   docker-compose up
