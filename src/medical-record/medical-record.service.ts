@@ -48,7 +48,7 @@ export class MedicalRecordService {
       medicalRecord.patient.id,
     );
     const transcriptions =
-      this.medicalCheckUpService.extractTranscriptions(medicalCheckUps);
+      await this.medicalCheckUpService.extractTranscriptions(medicalCheckUps);
     const technicalCheckUps =
       await this.technicalCheckUpService.findAllByPatientId(
         medicalRecord.patient.id,

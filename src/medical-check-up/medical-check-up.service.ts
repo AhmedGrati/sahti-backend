@@ -109,10 +109,13 @@ export class MedicalCheckUpService {
       .getMany();
   }
 
-  extractTranscriptions(medicalCheckUps: MedicalCheckUp[]) {
+  async extractTranscriptions(medicalCheckUps: MedicalCheckUp[]) {
     const transcriptions = [];
     for (let i = 0; i < medicalCheckUps.length; i++) {
-      transcriptions.push(medicalCheckUps[i].transcription);
+      const transcription = await this.transcriptionService.findOne(
+        medicalCheckUps[i].transcription.id,
+      );
+      transcriptions.push(transcription);
     }
     return transcriptions;
   }
