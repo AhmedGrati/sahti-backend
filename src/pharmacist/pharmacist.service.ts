@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePharmacistDto } from './dto/create-pharmacist.dto';
 
 import { PatientService } from '../patient/patient.service';
 import { Pharmacist } from './entities/pharmacist.entity';
-
+import { generateNotFoundErrorMessage } from 'src/utils/error-message-generator';
 @Injectable()
 export class PharmacistService {
   constructor(
@@ -25,8 +25,19 @@ export class PharmacistService {
   }
 
   findOne(id: number): Promise<Pharmacist> {
-    return this.pharmacistRepository.findOne({ where: { id } });
+    const pharmacist = this.pharmacistRepository.findOne({ where: { id } });
+    if (pharmacist) {
+      return pharmacist;
+    }
+    throw new NotFoundException(generateNotFoundErrorMessage(Pharmacist.name));
   }
+
+  /*async update(id: number, updatePharmacistDTO: UpdatePharmacistDto) {
+    const pharmacist: Pharmacist = await this.findOne(id);
+    if(pharmacist) {
+
+    }
+  }*/
 
   /*async update(id: number, updatePharmacistDto: UpdatePharmacistDto) {
     const pharmacist: Pharmacist = await this.findOne(id);

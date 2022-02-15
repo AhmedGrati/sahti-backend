@@ -1,0 +1,56 @@
+name: Sahti Backend Continuous Integration [CI]
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Run NPM CI
+        run: npm ci
+      - name: Run NPM Linter
+        run: npm run lint
+      - name: Build The Project With NPM
+        run: npm run build --if-present
+      # - name: Run Unit Tests
+      #   run: npm test
+      - name: Docker Login
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build Docker Image
+        run: |
+          docker build -t sahtiteam/sahti-backend:1.0.0 .
+      - name: Push Docker Image
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          docker push sahtiteam/sahti-backend:1.0.0          
+      # - name: Send Post CI Mail
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: smtp.gmail.com
+      #     server_port: 465
+      #     username: ${{secrets.MAIL_USERNAME}}
+      #     password: ${{secrets.PASSWORD}}
+      #     subject: Github Actions Build Result
+      #     from: ${{secrets.MAIL_USERNAME}}
+      #     to: ahmed.grati@insat.ucar.tn
+      #     secure: true
+      #     body: Build job of ${{github.repository}} completed successfully!

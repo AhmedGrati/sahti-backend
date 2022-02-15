@@ -1,0 +1,43 @@
+version: '3.7'
+
+services:
+  sahti-backend:
+    container_name: sahti-backend
+    image: sahtiteam/sahti-backend:1.0.0
+    ports:
+      - ${PORT}:${PORT}
+    env_file:
+      - .env
+    networks:
+      - webnet
+    depends_on:
+      - postgres
+      - redis
+  redis:
+    container_name: ${REDIS_HOST}
+    image: 'redis:alpine'
+    command:
+      - redis-server
+    networks:
+      - webnet
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    volumes:
+      - $PWD/redis-data:/var/lib/redis
+      - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+
+  postgres:
+    container_name: postgres
+    image: postgres:12
+    networks:
+      - webnet
+    env_file:
+      - .env
+    ports:
+      - 5431:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+networks:
+  webnet:
+volumes:
+  pgdata:

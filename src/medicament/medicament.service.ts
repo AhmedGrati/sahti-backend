@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MEDICMANET_NOT_FOUND_ERROR_MESSAGE } from 'src/utils/constants';
+import { generateNotFoundErrorMessage } from 'src/utils/error-message-generator';
 import { Repository, UpdateResult } from 'typeorm';
 import { CreateMedicamentDto } from './dto/create-medicament.dto';
 import { UpdateMedicamentDto } from './dto/update-medicament.dto';
@@ -19,8 +19,14 @@ export class MedicamentService {
     return this.medicamentRepository.save(medicament);
   }
 
-  async findAll(): Promise<Medicament[]> {
-    return this.medicamentRepository.find();
+  async findAll(filter = ''): Promise<Medicament[]> {
+    if (filter == '') {
+      return this.medicamentRepository.find();
+    }
+    filter = filter.toLowerCase();
+    return this.medicamentRepository.query(
+      `select * from medicament where lower("name") LIKE '${filter}%'`,
+    );
   }
 
   async findOne(id: number): Promise<Medicament> {
@@ -30,7 +36,7 @@ export class MedicamentService {
     if (medicament) {
       return medicament;
     }
-    throw new NotFoundException(MEDICMANET_NOT_FOUND_ERROR_MESSAGE);
+    throw new NotFoundException(generateNotFoundErrorMessage(Medicament.name));
   }
 
   async update(id: number, updateMedicamentDto: UpdateMedicamentDto) {
@@ -41,7 +47,7 @@ export class MedicamentService {
     if (medicament) {
       return this.medicamentRepository.save(medicament);
     }
-    throw new NotFoundException(MEDICMANET_NOT_FOUND_ERROR_MESSAGE);
+    throw new NotFoundException(generateNotFoundErrorMessage(Medicament.name));
   }
 
   async softDelete(id: number): Promise<UpdateResult> {
@@ -52,11 +58,30 @@ export class MedicamentService {
     return await this.medicamentRepository.restore(id);
   }
 
+  async findOneByName(name: string): Promise<Medicament> {
+    const medicament = await this.medicamentRepository.findOne({
+      where: { name },
+    });
+    if (medicament) {
+      return medicament;
+    }
+    throw new NotFoundException(generateNotFoundErrorMessage(Medicament.name));
+  }
+
   async findByIdList(idList: number[]): Promise<Medicament[]> {
     const medicaments = [];
     for (let i = 0; i < idList.length; i++) {
       const id = idList[i];
       const medicament = await this.findOne(id);
+      medicaments.push(medicament);
+    }
+    return medicaments;
+  }
+  async findByNameList(nameList: string[]): Promise<Medicament[]> {
+    const medicaments = [];
+    for (let i = 0; i < nameList.length; i++) {
+      const name = nameList[i];
+      const medicament = await this.findOneByName(name);
       medicaments.push(medicament);
     }
     return medicaments;

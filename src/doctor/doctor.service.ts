@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
 import { Doctor } from './entities/doctor.entity';
 import { PatientService } from '../patient/patient.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { generateNotFoundErrorMessage } from 'src/utils/error-message-generator';
 
 @Injectable()
 export class DoctorService {
@@ -19,18 +20,33 @@ export class DoctorService {
   }
 
   findAll() {
-    return `This action returns all doctor`;
+    return this.doctorRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} doctor`;
+  async findOne(id: number): Promise<Doctor> {
+    const doctor = await this.doctorRepository.findOne({ where: { id } });
+    if (doctor) {
+      return doctor;
+    }
+    throw new NotFoundException(generateNotFoundErrorMessage(Doctor.name));
   }
 
-  update(id: number, updateDoctorDto: UpdateDoctorDto) {
-    return `This action updates a #${id} doctor`;
+  async update(id: number, updateDoctorDto: UpdateDoctorDto): Promise<Doctor> {
+    const doctor = await this.doctorRepository.preload({
+      id,
+      ...updateDoctorDto,
+    });
+    if (doctor) {
+      return this.doctorRepository.save(doctor);
+    }
+    throw new NotFoundException(generateNotFoundErrorMessage(Doctor.name));
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} doctor`;
+  softDelete(id: number) {
+    return this.doctorRepository.softDelete(id);
+  }
+
+  restore(id: number) {
+    return this.doctorRepository.restore(id);
   }
 }

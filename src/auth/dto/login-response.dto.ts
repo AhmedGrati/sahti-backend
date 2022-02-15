@@ -1,6 +1,11 @@
-import { RoleEnum } from '../../patient/entities/role.enum';
+import { ApiProperty } from '@nestjs/swagger';
+import { Patient } from '../../patient/entities/patient.entity';
 
 export class LoginResponseDto {
-  token: string;
-  role: RoleEnum;
+  @ApiProperty()
+  accessToken: string;
+  @ApiProperty()
+  refreshToken: string;
+  @ApiProperty()
+  patient: Patient;
 }

@@ -1,7 +1,10 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
 export class CreateTranscriptionDto {
-  additionalInformation: string;
+  @ApiProperty()
+  remarks: string;
+  @ApiProperty()
   @IsNotEmpty()
   medicamentsIdList: number[];
 }
