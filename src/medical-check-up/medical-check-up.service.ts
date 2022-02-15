@@ -30,19 +30,20 @@ export class MedicalCheckUpService {
     const {
       additionalInformation,
       doctorId,
-      medicamentsIdList,
-      remarks,
+      medicamentNameList,
       patientId,
       namesOfChronicDiseases,
+      remarks,
       controlDate,
     } = createMedicalCheckUpDto;
     const medicalCheckUp = await this.medicalCheckUpRepository.create({});
     medicalCheckUp.controlDate = controlDate;
     /********* Create Transcription */
-    const transcription = await this.transcriptionService.create({
-      medicamentsIdList,
-      remarks,
-    });
+    const transcription =
+      await this.transcriptionService.createForMedicalCheckUp(
+        medicamentNameList,
+        remarks,
+      );
     medicalCheckUp.transcription = transcription;
     medicalCheckUp.additionalInformation = additionalInformation;
     /************ Assign to a doctor */

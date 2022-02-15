@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CreateTranscriptionDto } from 'src/transcription/dto/create-transcription.dto';
 
-export class CreateMedicalCheckUpDto extends CreateTranscriptionDto {
+export class CreateMedicalCheckUpDto {
   @ApiProperty()
   additionalInformation: string;
   @ApiProperty()
@@ -13,4 +12,10 @@ export class CreateMedicalCheckUpDto extends CreateTranscriptionDto {
 
   @ApiProperty()
   controlDate: Date;
+
+  @ApiProperty()
+  medicamentNameList: string[];
+
+  @ApiProperty()
+  remarks: string;
 }

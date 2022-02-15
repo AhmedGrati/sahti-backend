@@ -29,10 +29,10 @@ export class FakerMedicalCheckUpService {
         const allDoctors: Doctor[] = await this.doctorService.findAll();
         const allMedicaments: Medicament[] =
           await this.medicamentService.findAll();
-        const medicamentsIdList = [
-          allMedicaments[0].id,
-          allMedicaments[1].id,
-          allMedicaments[2].id,
+        const medicamentNameList = [
+          allMedicaments[0].name,
+          allMedicaments[1].name,
+          allMedicaments[2].name,
         ];
         allDoctors.forEach(async (doctor, index) => {
           const patientId = allPatients[index].id;
@@ -40,7 +40,7 @@ export class FakerMedicalCheckUpService {
             patientId,
             doctorId: doctor.id,
             remarks: 'Important Remarks',
-            medicamentsIdList,
+            medicamentNameList,
             additionalInformation: 'Additional Information',
             namesOfChronicDiseases: ['Chron'],
             controlDate: new Date(),

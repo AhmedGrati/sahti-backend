@@ -58,11 +58,30 @@ export class MedicamentService {
     return await this.medicamentRepository.restore(id);
   }
 
+  async findOneByName(name: string): Promise<Medicament> {
+    const medicament = await this.medicamentRepository.findOne({
+      where: { name },
+    });
+    if (medicament) {
+      return medicament;
+    }
+    throw new NotFoundException(generateNotFoundErrorMessage(Medicament.name));
+  }
+
   async findByIdList(idList: number[]): Promise<Medicament[]> {
     const medicaments = [];
     for (let i = 0; i < idList.length; i++) {
       const id = idList[i];
       const medicament = await this.findOne(id);
+      medicaments.push(medicament);
+    }
+    return medicaments;
+  }
+  async findByNameList(nameList: string[]): Promise<Medicament[]> {
+    const medicaments = [];
+    for (let i = 0; i < nameList.length; i++) {
+      const name = nameList[i];
+      const medicament = await this.findOneByName(name);
       medicaments.push(medicament);
     }
     return medicaments;

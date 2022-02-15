@@ -30,6 +30,17 @@ export class TranscriptionService {
     return this.transcriptionRepository.save(transcription);
   }
 
+  async createForMedicalCheckUp(medicamentNameList: string[], remarks: string) {
+    const transcription = await this.transcriptionRepository.create({
+      remarks,
+    });
+    const medicaments = await this.medicamentService.findByNameList(
+      medicamentNameList,
+    );
+    transcription.medicaments = medicaments;
+    return this.transcriptionRepository.save(transcription);
+  }
+
   async findAll(): Promise<Transcription[]> {
     return this.transcriptionRepository.find();
   }
